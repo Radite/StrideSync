@@ -20,50 +20,39 @@ const DashboardScreen = ({ navigation }) => {
     javelin: { total: 0, average: 0 },
     hammerThrow: { total: 0, average: 0 }
   });
+  const [totalDistanceRan, setTotalDistanceRan] = useState(0);
+  const [totalTimeRan, setTotalTimeRan] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
-        const sessions = response.data;
-        if (sessions.length > 0) {
-          sessions.sort((a, b) => new Date(b.SessionDate) - new Date(a.SessionDate));
-          setMostRecentSession(sessions[0]);
+        // Fetch total distances
+        const distanceResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/distance');
+        const distances = distanceResponse.data;
+        
+        // Set total distance ran
+        setTotalDistanceRan(distances.totalDistanceRan);
 
-          // Calculate field event stats
-          const eventStats = sessions.reduce((stats, session) => {
-            if (session.SessionType === 'field') {
-              const eventType = session.EventType;
-              const distance = session.Distance || 0;
+        // Fetch event counts and total time ran
+        const eventCountsResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/event-counts-and-distance');
+        const eventCounts = eventCountsResponse.data;
+        
+        // Set total time ran
+        setTotalTimeRan(eventCounts.totalTimeRan);
 
-              if (stats[eventType]) {
-                stats[eventType].total += distance;
-                stats[eventType].count += 1;
-              }
-            }
-            return stats;
-          }, {
-            highJump: { total: 0, count: 0 },
-            longJump: { total: 0, count: 0 },
-            poleVault: { total: 0, count: 0 },
-            shotPut: { total: 0, count: 0 },
-            discus: { total: 0, count: 0 },
-            javelin: { total: 0, count: 0 },
-            hammerThrow: { total: 0, count: 0 }
-          });
+        // Calculate averages
+        const formattedStats = {
+          highJump: { total: distances.totalDistanceHighJumped, average: (eventCounts.totalHighJumps > 0 ? (distances.totalDistanceHighJumped / eventCounts.totalHighJumps).toFixed(2) : 0) },
+          longJump: { total: distances.totalDistanceLongJumped, average: (eventCounts.totalLongJumps > 0 ? (distances.totalDistanceLongJumped / eventCounts.totalLongJumps).toFixed(2) : 0) },
+          poleVault: { total: distances.totalDistancePoleVaulted, average: (eventCounts.totalPoleVaults > 0 ? (distances.totalDistancePoleVaulted / eventCounts.totalPoleVaults).toFixed(2) : 0) },
+          shotPut: { total: distances.totalDistanceShotPut, average: (eventCounts.totalShotPuts > 0 ? (distances.totalDistanceShotPut / eventCounts.totalShotPuts).toFixed(2) : 0) },
+          discus: { total: distances.totalDistanceDiscusThrown, average: (eventCounts.totalDiscusThrows > 0 ? (distances.totalDistanceDiscusThrown / eventCounts.totalDiscusThrows).toFixed(2) : 0) },
+          javelin: { total: distances.totalDistanceJavelinThrown, average: (eventCounts.totalJavelinThrows > 0 ? (distances.totalDistanceJavelinThrown / eventCounts.totalJavelinThrows).toFixed(2) : 0) },
+          hammerThrow: { total: distances.totalDistanceHammerThrown, average: (eventCounts.totalHammerThrows > 0 ? (distances.totalDistanceHammerThrown / eventCounts.totalHammerThrows).toFixed(2) : 0) }
+        };
 
-          // Calculate average distances
-          const formattedStats = Object.keys(eventStats).reduce((acc, key) => {
-            const { total, count } = eventStats[key];
-            acc[key] = {
-              total,
-              average: count > 0 ? (total / count).toFixed(2) : 0
-            };
-            return acc;
-          }, {});
+        setFieldEventStats(formattedStats);
 
-          setFieldEventStats(formattedStats);
-        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -73,6 +62,11 @@ const DashboardScreen = ({ navigation }) => {
 
     fetchData();
   }, []);
+
+  // Calculate average pace
+  const distanceInKilometers = totalDistanceRan / 1000;
+  const timeInMinutes = totalTimeRan / 60;
+  const averagePace = distanceInKilometers > 0 ? (timeInMinutes / distanceInKilometers).toFixed(2) : '0.00';
 
   if (loading) {
     return (
@@ -108,8 +102,8 @@ const DashboardScreen = ({ navigation }) => {
           {/* Combined Card for Running Metrics */}
           <TouchableOpacity style={styles.card}>
             <Text style={styles.cardTitle}>Running Metrics</Text>
-            <Text style={styles.cardValue}>Total Distance: 150 km</Text>
-            <Text style={styles.cardValue}>Average Pace: 4:30 min/km</Text>
+            <Text style={styles.cardValue}>Total Distance: {totalDistanceRan / 1000} km</Text>
+            <Text style={styles.cardValue}>Average Pace: {averagePace} min/km</Text>
           </TouchableOpacity>
           {Object.keys(fieldEventStats).map((eventKey, index) => {
             const stats = fieldEventStats[eventKey];
@@ -173,7 +167,6 @@ const DashboardScreen = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -189,7 +182,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    width: width * 0.4, // Adjusted width for each card
+    width: width * 0.5, // Adjusted width for each card
     backgroundColor: '#1C1C1C', // Matching card background color
     borderRadius: 12,
     padding: 15,
