@@ -9,4 +9,8 @@ router.post('/', athleteProfileController.createProfile);
 router.put('/:id', athleteProfileController.updateProfile);
 router.delete('/:id', athleteProfileController.deleteProfile);
 
+// Additional Routes
+router.get('/:id/event-counts-and-distance', athleteProfileController.getTotalEventCountsAndTotalTime);
+router.get('/:id/distance', athleteProfileController.getTotalDistance);
+
 module.exports = router;

@@ -63,3 +63,15 @@ exports.deleteCompetition = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get all competitions for a given athlete ID
+exports.getCompetitionsByAthleteId = async (req, res) => {
+  const { athleteId } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM Competitions WHERE AthleteID = ?', [athleteId]);
+    if (rows.length === 0) return res.status(404).json({ error: 'No competitions found for this athlete' });
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

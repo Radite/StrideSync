@@ -63,3 +63,49 @@ exports.deleteProfile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get total number of times each event was done and total distance ran
+exports.getTotalEventCountsAndTotalTime = async (req, res) => {
+  try {
+    // Adjust the query to get aggregated data for a specific profile or criteria
+    const [rows] = await db.query(`
+      SELECT 
+        TotalTimesLongJumped AS totalLongJumps,
+        TotalTimesHighJumped AS totalHighJumps,
+        TotalTimesShotPut AS totalShotPuts,
+        TotalTimesDiscusThrown AS totalDiscusThrows,
+        TotalTimesJavelinThrown AS totalJavelinThrows,
+        TotalTimesHammerThrown AS totalHammerThrows,
+        TotalTimesPoleVaulted AS totalPoleVaults,
+        TotalTimeRan AS totalTimeRan
+      FROM AthleteProfile
+      WHERE AthleteID = ? -- Use a parameter to specify the profile
+    `, [req.params.id]); // Assuming req.params.id is the AthleteID
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.getTotalDistance = async (req, res) => {
+  try {
+    // Adjust the query to get aggregated data for a specific profile or criteria
+    const [rows] = await db.query(`
+      SELECT 
+        TotalDistanceLongJumped AS totalDistanceLongJumped,
+        TotalDistanceHighJumped AS totalDistanceHighJumped,
+        TotalDistanceShotPut AS totalDistanceShotPut,
+        TotalDistanceDiscusThrown AS totalDistanceDiscusThrown,
+        TotalDistanceJavelinThrown AS totalDistanceJavelinThrown,
+        TotalDistanceHammerThrown AS totalDistanceHammerThrown,
+        TotalDistancePoleVaulted AS totalDistancePoleVaulted,
+        TotalDistanceRan AS totalDistanceRan
+      FROM AthleteProfile
+      WHERE AthleteID = ? -- Use a parameter to specify the profile
+    `, [req.params.id]); // Assuming req.params.id is the AthleteID
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
