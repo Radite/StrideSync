@@ -62,11 +62,19 @@ const CompetitionLogScreen = ({ navigation }) => {
   };
 
   const onDayPress = (day) => {
-    if (!startDate || endDate) {
-      setStartDate(day.dateString);
-      setEndDate('');
-    } else {
-      setEndDate(day.dateString);
+    const selectedDate = day.dateString;
+  
+    if (!startDate || (endDate && selectedDate < startDate)) {
+      // Set start date and reset end date
+      setStartDate(selectedDate);
+      setEndDate(null);
+    } else if (!endDate && selectedDate > startDate) {
+      // Set end date only if it's after start date
+      setEndDate(selectedDate);
+    } else if (startDate && endDate) {
+      // Reset dates if both are set
+      setStartDate(selectedDate);
+      setEndDate(null);
     }
   };
 
@@ -128,16 +136,6 @@ const CompetitionLogScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Header title="Competition Log" navigation={navigation} />
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search competitions..."
-          placeholderTextColor="#888"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
       <View style={styles.filterContainer}>
         <Text style={styles.filterLabel}>Filter by Date:</Text>
 
@@ -187,6 +185,16 @@ const CompetitionLogScreen = ({ navigation }) => {
         )}
       </View>
 
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search competitions..."
+          placeholderTextColor="#888"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.sectionTitle}>Competitions</Text>
         {filteredData.length > 0 ? (
@@ -199,21 +207,15 @@ const CompetitionLogScreen = ({ navigation }) => {
             </View>
           ))
         ) : (
-          <Text style={styles.noResultsText}>No results found.</Text>
+          <Text style={styles.noResults}>No competitions found</Text>
         )}
       </ScrollView>
-
-      <TouchableOpacity
-        style={styles.logButton}
-        onPress={() => navigation.navigate('LogCompetition')}
-      >
-        <Text style={styles.logButtonText}>Add New Competition</Text>
-      </TouchableOpacity>
 
       <Footer navigation={navigation} />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
   sessionDetail: { fontSize: 14, color: '#fff', marginBottom: 2, fontFamily: 'Montserrat-Regular' },
   searchContainer: { paddingHorizontal: 20, marginBottom: 20 },
   searchInput: { backgroundColor: '#333', color: '#fff', borderRadius: 10, paddingHorizontal: 15, height: 40, fontSize: 16 },
-  filterContainer: { paddingHorizontal: 20, marginBottom: 20 },
+  filterContainer: { paddingHorizontal: 20, marginBottom: 20, marginTop: 10 },
   filterLabel: { color: '#D0FD3E', marginBottom: 10, fontFamily: 'Montserrat-SemiBold' },
   filterDropdown: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#333', padding: 10, borderRadius: 10 },
   filterText: { color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Regular' },
