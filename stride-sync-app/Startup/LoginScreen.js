@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   termsLink: {
-    color: '#4CAF50',
+    color: '#FFB74D',
     textDecorationLine: 'underline',
   },
 });

@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFB74D',
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Bold',
   },
   link: {
-    color: '#4CAF50',
+    color: '#FFB74D',
     fontSize: 16,
     textAlign: 'center',
     marginTop: 15,
