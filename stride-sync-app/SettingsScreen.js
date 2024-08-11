@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, Switch, TouchableOpacity, StyleSheet, Modal, Button, Alert } from 'react-native';
+import Header from './Header'; // Adjust the import path as needed
+import Footer from './Footer';
 
 const SettingsScreen = ({ navigation }) => {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
@@ -30,6 +32,7 @@ const SettingsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Header title="Settings" navigation={navigation} />
       <View style={styles.settingsContainer}>
         <Text style={styles.settingsTitle}>Account Settings</Text>
         {/* Add account settings options */}
@@ -98,6 +101,8 @@ const SettingsScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      <Footer navigation={navigation}/>
+
     </View>
   );
 };
@@ -145,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   optionButtonText: {
-    color: '#4CAF50', // Accent color for option buttons
+    color: '#ffff', // Accent color for option buttons
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
   },

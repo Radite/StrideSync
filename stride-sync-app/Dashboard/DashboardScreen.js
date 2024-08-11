@@ -120,15 +120,6 @@ const DashboardScreen = ({ navigation }) => {
             <Text style={styles.eventItem}>Event 2: Marathon - September 15, 2024</Text>
           </View>
         </View>
-
-        {/* Season Progress */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Season Progress</Text>
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>Total Distance This Season: 200 km</Text>
-            <Text style={styles.progressText}>Goals Achieved: 3/5</Text>
-          </View>
-        </View>
       </ScrollView>
 
       {/* Footer component */}

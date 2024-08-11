@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList, Button } from 'react-native';
-
+import Header from './Header'; // Adjust the import path as needed
+import Footer from './Footer';
 const ProfileScreen = ({ navigation }) => {
   const [profilePic, setProfilePic] = useState(null); // Placeholder for profile picture
   const [name, setName] = useState('User Name');
@@ -37,6 +38,7 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Header title="Profile" navigation={navigation} />
       <View style={styles.profileContainer}>
         {profilePic ? (
           <Image source={{ uri: profilePic }} style={styles.profilePic} />
@@ -91,6 +93,8 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
+      <Footer navigation={navigation} />
+
     </View>
   );
 };
