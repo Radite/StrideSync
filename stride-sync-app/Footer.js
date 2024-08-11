@@ -1,11 +1,9 @@
-// Footer.js
-
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons from expo/vector-icons
 
 const Footer = ({ navigation, activeScreen }) => {
-  const getIconColor = (screenName) => (screenName === activeScreen ? '#D0FD3E' : '#FFFFFF');
+  const getIconColor = (screenName) => (screenName === activeScreen ? '#FFB74D' : '#FFFFFF');
 
   return (
     <View style={styles.bottomBar}>
@@ -21,7 +19,7 @@ const Footer = ({ navigation, activeScreen }) => {
         onPress={() => navigation.navigate('TrainingLog')}
       >
         <Ionicons name="barbell-outline" size={24} color={getIconColor('TrainingLog')} />
-        <Text style={styles.bottomBarText}>Exercise Library</Text>
+        <Text style={styles.bottomBarText}>Training</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.bottomBarItem}
@@ -43,6 +41,13 @@ const Footer = ({ navigation, activeScreen }) => {
       >
         <Ionicons name="analytics-outline" size={24} color={getIconColor('AdvancedDataVisualization')} />
         <Text style={styles.bottomBarText}>Analytics</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.bottomBarItem}
+        onPress={() => navigation.navigate('Plan')}
+      >
+        <Ionicons name="reader-outline" size={24} color={getIconColor('Plan')} />
+        <Text style={styles.bottomBarText}>Plan</Text>
       </TouchableOpacity>
     </View>
   );

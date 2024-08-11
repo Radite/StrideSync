@@ -125,20 +125,110 @@ const PerformancePredictionScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  content: { padding: 20, marginTop: 10 },
-  section: { marginBottom: 30 },
-  sectionTitle: { color: '#D0FD3E', fontSize: 20, fontFamily: 'Montserrat-Bold', marginBottom: 15 },
-  picker: { height: 50, width: '100%', color: '#fff', backgroundColor: '#333', borderRadius: 5 },
-  input: { backgroundColor: '#333', color: '#fff', padding: 15, borderRadius: 5, marginBottom: 10 },
-  button: { backgroundColor: '#D0FD3E', padding: 15, borderRadius: 5, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#000', fontSize: 16, fontFamily: 'Montserrat-SemiBold' },
-  resultText: { marginTop: 15, color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Regular' },
-  windSpeedText: { color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Regular', marginBottom: 10 },
-  slider: { width: '100%', height: 40 },
-  uploadSection: { marginTop: 10, marginBottom: 100 }, // Adds space above the upload button
-  uploadButton: { backgroundColor: '#D0FD3E', padding: 15, borderRadius: 5, alignItems: 'center', marginTop: 20 },
-  uploadButtonText: { color: '#000', fontSize: 16, fontFamily: 'Montserrat-SemiBold' },
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0A0A', // Matching background color
+  },
+  content: {
+    paddingHorizontal: 10, // Reduced padding for consistency
+    marginTop: 10,
+    paddingBottom: 150, // Increased padding to match footer height
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    color: '#FFB74D', // Consistent title color
+    fontSize: 22, // Larger font size to match other sections
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 15,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    color: '#E0E0E0', // Consistent text color
+    backgroundColor: '#1C1C1C', // Matching background color
+    borderRadius: 12,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  input: {
+    backgroundColor: '#1C1C1C', // Consistent input background color
+    color: '#E0E0E0', // Consistent input text color
+    padding: 15,
+    borderRadius: 12, // Matching border radius
+    marginBottom: 10,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  button: {
+    backgroundColor: '#FFB74D', // Consistent button color
+    padding: 15,
+    borderRadius: 12, // Matching border radius
+    alignItems: 'center',
+    marginTop: 10,
+    borderColor: '#F57C00',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonText: {
+    color: '#0A0A0A', // Consistent button text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  resultText: {
+    marginTop: 15,
+    color: '#E0E0E0', // Consistent result text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
+  },
+  windSpeedText: {
+    color: '#E0E0E0', // Consistent wind speed text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
+    marginBottom: 10,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  uploadSection: {
+    marginTop: 10,
+    marginBottom: 150, // Increased margin to match footer height
+  },
+  uploadButton: {
+    backgroundColor: '#FFB74D', // Consistent upload button color
+    padding: 15,
+    borderRadius: 12, // Matching border radius
+    alignItems: 'center',
+    marginTop: 20,
+    borderColor: '#F57C00',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  uploadButtonText: {
+    color: '#0A0A0A', // Consistent upload button text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-SemiBold',
+  },
 });
 
 export default PerformancePredictionScreen;

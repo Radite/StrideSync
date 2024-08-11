@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#444', // Border for visual separation
   },
   title: {
-    color: '#fff',
+    color: '#FFB74D',
     fontSize: 24,
     fontWeight: 'bold',
   },

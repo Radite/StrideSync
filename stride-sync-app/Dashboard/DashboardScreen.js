@@ -140,11 +140,11 @@ const DashboardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Dark background for a modern look
+    backgroundColor: '#0A0A0A', // Matching background color
   },
   content: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 10,
+    paddingBottom: 150, // Increased padding to match footer height
     marginTop: 10,
   },
   summaryContainer: {
@@ -154,78 +154,101 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#1C1C1C', // Matching card background color
     borderRadius: 12,
     padding: 15,
     marginHorizontal: 5,
+    borderColor: '#333',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 2,
   },
   cardTitle: {
     fontSize: 16,
-    color: '#B0B0B0',
+    color: '#F0F0F0', // Consistent font color
     fontFamily: 'Montserrat-SemiBold',
   },
   cardValue: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#E0E0E0', // Consistent font color
   },
   section: {
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Montserrat-Bold',
-    color: '#E0E0E0',
+    color: '#FFB74D', // Consistent section title color
     marginBottom: 15,
     paddingBottom: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#444',
+    borderBottomColor: '#444', // Consistent border color
   },
   chart: {
     marginVertical: 8,
   },
   activityFeed: {
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#1C1C1C', // Matching activity feed background color
     borderRadius: 12,
     padding: 15,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   activityItem: {
     marginBottom: 10,
   },
   activityDate: {
     fontSize: 16,
-    color: '#B0B0B0',
+    color: '#FFB74D', // Consistent date color
   },
   activityDetail: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#E0E0E0', // Consistent detail color
   },
   eventList: {
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#1C1C1C', // Matching event list background color
     borderRadius: 12,
     padding: 15,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   eventItem: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#E0E0E0', // Consistent item color
     marginBottom: 10,
   },
   progressContainer: {
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#1C1C1C', // Matching progress container background color
     borderRadius: 12,
     padding: 15,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   progressText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#E0E0E0', // Consistent progress text color
     marginBottom: 10,
   },
   errorText: {
-    color: '#E0E0E0',
+    color: '#E0E0E0', // Consistent error text color
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,

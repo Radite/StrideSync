@@ -65,14 +65,11 @@ const CompetitionLogScreen = ({ navigation }) => {
     const selectedDate = day.dateString;
   
     if (!startDate || (endDate && selectedDate < startDate)) {
-      // Set start date and reset end date
       setStartDate(selectedDate);
       setEndDate(null);
     } else if (!endDate && selectedDate > startDate) {
-      // Set end date only if it's after start date
       setEndDate(selectedDate);
     } else if (startDate && endDate) {
-      // Reset dates if both are set
       setStartDate(selectedDate);
       setEndDate(null);
     }
@@ -82,11 +79,11 @@ const CompetitionLogScreen = ({ navigation }) => {
     const markedDates = {};
 
     if (startDate) {
-      markedDates[startDate] = { startingDay: true, color: '#50cebb', textColor: 'white' };
+      markedDates[startDate] = { startingDay: true, color: '#FFB74D', textColor: 'white' };
     }
 
     if (endDate) {
-      markedDates[endDate] = { endingDay: true, color: '#50cebb', textColor: 'white' };
+      markedDates[endDate] = { endingDay: true, color: '#FFB74D', textColor: 'white' };
     }
 
     if (startDate && endDate) {
@@ -94,7 +91,7 @@ const CompetitionLogScreen = ({ navigation }) => {
       let end = new Date(endDate);
       while (start <= end) {
         const dateString = format(start, 'yyyy-MM-dd');
-        markedDates[dateString] = { color: '#70d7c7', textColor: 'white' };
+        markedDates[dateString] = { color: '#FFB74D', textColor: 'white' };
         start.setDate(start.getDate() + 1);
       }
     }
@@ -207,7 +204,7 @@ const CompetitionLogScreen = ({ navigation }) => {
             </View>
           ))
         ) : (
-          <Text style={styles.noResults}>No competitions found</Text>
+          <Text style={styles.noResultsText}>No competitions found</Text>
         )}
       </ScrollView>
 
@@ -216,30 +213,160 @@ const CompetitionLogScreen = ({ navigation }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  content: { paddingHorizontal: 20, paddingBottom: 150 },
-  sectionTitle: { fontSize: 20, fontFamily: 'Montserrat-Bold', color: '#D0FD3E', marginBottom: 20 },
-  sessionContainer: { backgroundColor: '#333', padding: 15, borderRadius: 10, marginBottom: 15 },
-  sessionDate: { fontSize: 16, color: '#D0FD3E', marginBottom: 5, fontFamily: 'Montserrat-SemiBold' },
-  sessionDetail: { fontSize: 14, color: '#fff', marginBottom: 2, fontFamily: 'Montserrat-Regular' },
-  searchContainer: { paddingHorizontal: 20, marginBottom: 20 },
-  searchInput: { backgroundColor: '#333', color: '#fff', borderRadius: 10, paddingHorizontal: 15, height: 40, fontSize: 16 },
-  filterContainer: { paddingHorizontal: 20, marginBottom: 20, marginTop: 10 },
-  filterLabel: { color: '#D0FD3E', marginBottom: 10, fontFamily: 'Montserrat-SemiBold' },
-  filterDropdown: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#333', padding: 10, borderRadius: 10 },
-  filterText: { color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Regular' },
-  arrow: { color: '#fff', fontSize: 16 },
-  quickLinksContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  quickLink: { paddingVertical: 5, paddingHorizontal: 10, backgroundColor: '#444', borderRadius: 5 },
-  quickLinkText: { color: '#fff', fontSize: 14, fontFamily: 'Montserrat-Regular' },
-  calendarContainer: { backgroundColor: '#333', borderRadius: 10, padding: 10, marginTop: 10 },
-  doneButton: { backgroundColor: '#D0FD3E', padding: 10, borderRadius: 10, alignItems: 'center', marginTop: 10 },
-  doneButtonText: { color: '#000', fontSize: 16, fontFamily: 'Montserrat-Bold' },
-  logButton: { position: 'absolute', bottom: 110, left: 20, right: 20, backgroundColor: '#D0FD3E', paddingVertical: 15, borderRadius: 10, alignItems: 'center' },
-  logButtonText: { fontSize: 18, color: '#000', fontFamily: 'Montserrat-Bold' },
-  noResultsText: { color: '#fff', textAlign: 'center', marginTop: 20, fontFamily: 'Montserrat-Regular' },
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0A0A', // Background color for consistency
+  },
+  content: {
+    paddingHorizontal: 10,
+    paddingBottom: 150, // Ensure space for footer
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: 'Montserrat-Bold',
+    color: '#FFB74D', // Title color
+    marginBottom: 20,
+  },
+  sessionContainer: {
+    backgroundColor: '#1C1C1C', // Background color for sessions
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sessionDate: {
+    fontSize: 16,
+    color: '#FFB74D', // Date color
+    marginBottom: 5,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  sessionDetail: {
+    fontSize: 14,
+    color: '#E0E0E0', // Detail color
+    marginBottom: 2,
+    fontFamily: 'Montserrat-Regular',
+  },
+  searchContainer: {
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  searchInput: {
+    backgroundColor: '#1C1C1C',
+    color: '#E0E0E0',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 45,
+    fontSize: 16,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  filterContainer: {
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  filterLabel: {
+    color: '#FFB74D', // Label color
+    marginBottom: 10,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  filterDropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1C1C1C',
+    padding: 12,
+    borderRadius: 12,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  filterText: {
+    color: '#E0E0E0', // Filter text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
+  },
+  arrow: {
+    color: '#E0E0E0', // Arrow color
+    fontSize: 16,
+  },
+  quickLinksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  quickLink: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#2C2C2C',
+    borderRadius: 8,
+    borderColor: '#444',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  quickLinkText: {
+    color: '#E0E0E0', // Quick link text color
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
+  },
+  calendarContainer: {
+    backgroundColor: '#1C1C1C',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 10,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  doneButton: {
+    backgroundColor: '#FFB74D',
+    padding: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    borderColor: '#F57C00',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  doneButtonText: {
+    color: '#0A0A0A', // Button text color
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+  },
+  noResultsText: {
+    color: '#E0E0E0', // No results text color
+    textAlign: 'center',
+    marginTop: 20,
+    fontFamily: 'Montserrat-Regular',
+  },
 });
 
 export default CompetitionLogScreen;
