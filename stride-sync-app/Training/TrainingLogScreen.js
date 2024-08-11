@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 10,
     paddingBottom: 10,
+    marginTop: 10
   },
   filterContainer: {
     paddingHorizontal: 10,

@@ -8,6 +8,20 @@ import moment from 'moment';
 
 const { width } = Dimensions.get('window');
 
+// Sample motivational quotes
+const quotes = [
+  "The only limit to our realization of tomorrow is our doubts of today.",
+  "Do not wait; the time will never be 'just right.' Start where you stand, and work with whatever tools you may have at your command.",
+  "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+  "Believe you can and you're halfway there.",
+  "The harder you work for something, the greater you'll feel when you achieve it."
+];
+
+const getDailyQuote = () => {
+  const dayOfYear = moment().dayOfYear();
+  return quotes[dayOfYear % quotes.length];
+};
+
 const DashboardScreen = ({ navigation }) => {
   const [mostRecentSession, setMostRecentSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +39,7 @@ const DashboardScreen = ({ navigation }) => {
   const [totalTimeRan, setTotalTimeRan] = useState(0);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [intensityData, setIntensityData] = useState({ labels: [], datasets: [] });
+  const [dailyQuote, setDailyQuote] = useState(getDailyQuote());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -180,9 +195,8 @@ const DashboardScreen = ({ navigation }) => {
             }}
             style={styles.chart}
           />
+          <Text style={styles.quoteText}>{dailyQuote}</Text>
         </View>
-
-
       </ScrollView>
 
       <Footer navigation={navigation} activeScreen="Dashboard" />
@@ -245,28 +259,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
   },
-  activityFeed: {
-    backgroundColor: '#1C1C1C',
-    borderRadius: 12,
-    padding: 15,
-    borderColor: '#333',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  activityItem: {
-    marginBottom: 10,
-  },
-  activityDate: {
-    fontSize: 16,
-    color: '#FFB74D',
-  },
-  activityDetail: {
-    fontSize: 16,
+  quoteText: {
+    fontSize: 18,
     color: '#E0E0E0',
+    marginTop: 30,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingHorizontal: 15,
   },
   eventList: {
     backgroundColor: '#1C1C1C',

@@ -76,6 +76,7 @@ const App = () => {
             gestureEnabled: true,
             gestureDirection: 'horizontal',
             ...TransitionPresets.SlideFromRightIOS,
+            headerShown: false, // Hide the header for all screens
           }}
         >
           {/* Authentication Screens */}
