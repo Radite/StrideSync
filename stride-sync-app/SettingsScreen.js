@@ -33,7 +33,7 @@ const SettingsScreen = ({ navigation }) => {
       <View style={styles.settingsContainer}>
         <Text style={styles.settingsTitle}>Account Settings</Text>
         {/* Add account settings options */}
-        
+
         <Text style={styles.settingsTitle}>Notification Preferences</Text>
         <View style={styles.settingItem}>
           <Text style={styles.settingText}>Enable Notifications</Text>
@@ -92,7 +92,7 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>Are you sure you want to delete your account? This action cannot be undone.</Text>
             <View style={styles.modalButtons}>
-              <Button title="Cancel" onPress={cancelAccountDeletion} />
+              <Button title="Cancel" onPress={cancelAccountDeletion} color="#FFB74D" />
               <Button title="Delete" onPress={confirmAccountDeletion} color="red" />
             </View>
           </View>
@@ -105,7 +105,7 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // Dark Background Color
+    backgroundColor: '#0A0A0A', // Dark Background Color
   },
   settingsContainer: {
     padding: 20,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   settingsTitle: {
     fontSize: 18,
     fontFamily: 'Montserrat-Bold',
-    color: '#ffffff',
+    color: '#FFB74D', // Matching color with other screens
     marginBottom: 10,
   },
   settingItem: {
@@ -123,18 +123,21 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   settingText: {
-    color: '#ffffff',
+    color: '#E0E0E0', // Light text color for dark background
     fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
   },
   submitButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFB74D',
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+    borderColor: '#F57C00',
+    borderWidth: 1,
   },
   submitButtonText: {
-    color: '#ffffff',
+    color: '#0A0A0A', // Dark text color for button
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
   },
@@ -142,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   optionButtonText: {
-    color: '#4CAF50',
+    color: '#4CAF50', // Accent color for option buttons
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
   },
@@ -150,18 +153,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark overlay for modal
   },
   modalContent: {
     width: '80%',
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1C1C1C', // Dark background for modal
     borderRadius: 10,
     alignItems: 'center',
   },
   modalText: {
+    color: '#E0E0E0', // Light text color in modal
     fontSize: 16,
     marginBottom: 20,
+    fontFamily: 'Montserrat-Regular',
   },
   modalButtons: {
     flexDirection: 'row',
