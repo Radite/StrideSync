@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList, Button } from 'react-native';
 import Header from './Header'; // Adjust the import path as needed
 import Footer from './Footer';
+import DefaultProfilePic from './assets/Default_pfp.png'; // Adjust the import path as needed
+
 const ProfileScreen = ({ navigation }) => {
   const [profilePic, setProfilePic] = useState(null); // Placeholder for profile picture
   const [name, setName] = useState('User Name');
@@ -40,13 +42,10 @@ const ProfileScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Header title="Profile" navigation={navigation} />
       <View style={styles.profileContainer}>
-        {profilePic ? (
-          <Image source={{ uri: profilePic }} style={styles.profilePic} />
-        ) : (
-          <View style={styles.profilePicPlaceholder}>
-            <Text style={styles.profilePicText}>Upload Photo</Text>
-          </View>
-        )}
+        <Image
+          source={profilePic ? { uri: profilePic } : DefaultProfilePic}
+          style={styles.profilePic}
+        />
         <Button title="Upload Profile Picture" onPress={handleProfilePicUpload} color="#FFB74D" />
         
         <TextInput
@@ -94,7 +93,6 @@ const ProfileScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <Footer navigation={navigation} />
-
     </View>
   );
 };
