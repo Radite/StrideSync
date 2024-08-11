@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
 import Footer from '../Footer'; 
 import Header from '../Header'; 
 import axios from 'axios'; // For making HTTP requests
 import { LineChart } from 'react-native-chart-kit'; // For mini charts
-import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -12,6 +11,15 @@ const DashboardScreen = ({ navigation }) => {
   const [mostRecentSession, setMostRecentSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fieldEventStats, setFieldEventStats] = useState({
+    highJump: { total: 0, average: 0 },
+    longJump: { total: 0, average: 0 },
+    poleVault: { total: 0, average: 0 },
+    shotPut: { total: 0, average: 0 },
+    discus: { total: 0, average: 0 },
+    javelin: { total: 0, average: 0 },
+    hammerThrow: { total: 0, average: 0 }
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,6 +29,40 @@ const DashboardScreen = ({ navigation }) => {
         if (sessions.length > 0) {
           sessions.sort((a, b) => new Date(b.SessionDate) - new Date(a.SessionDate));
           setMostRecentSession(sessions[0]);
+
+          // Calculate field event stats
+          const eventStats = sessions.reduce((stats, session) => {
+            if (session.SessionType === 'field') {
+              const eventType = session.EventType;
+              const distance = session.Distance || 0;
+
+              if (stats[eventType]) {
+                stats[eventType].total += distance;
+                stats[eventType].count += 1;
+              }
+            }
+            return stats;
+          }, {
+            highJump: { total: 0, count: 0 },
+            longJump: { total: 0, count: 0 },
+            poleVault: { total: 0, count: 0 },
+            shotPut: { total: 0, count: 0 },
+            discus: { total: 0, count: 0 },
+            javelin: { total: 0, count: 0 },
+            hammerThrow: { total: 0, count: 0 }
+          });
+
+          // Calculate average distances
+          const formattedStats = Object.keys(eventStats).reduce((acc, key) => {
+            const { total, count } = eventStats[key];
+            acc[key] = {
+              total,
+              average: count > 0 ? (total / count).toFixed(2) : 0
+            };
+            return acc;
+          }, {});
+
+          setFieldEventStats(formattedStats);
         }
       } catch (err) {
         setError(err.message);
@@ -61,21 +103,25 @@ const DashboardScreen = ({ navigation }) => {
       <Header title="Dashboard" navigation={navigation} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Summary Cards */}
-        <View style={styles.summaryContainer}>
+        {/* Horizontal ScrollView for Cards */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardsScrollView}>
+          {/* Combined Card for Running Metrics */}
           <TouchableOpacity style={styles.card}>
-            <Text style={styles.cardTitle}>Recent Personal Best</Text>
-            <Text style={styles.cardValue}>10.5 km</Text>
+            <Text style={styles.cardTitle}>Running Metrics</Text>
+            <Text style={styles.cardValue}>Total Distance: 150 km</Text>
+            <Text style={styles.cardValue}>Average Pace: 4:30 min/km</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.card}>
-            <Text style={styles.cardTitle}>Average Pace</Text>
-            <Text style={styles.cardValue}>4:30 min/km</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.card}>
-            <Text style={styles.cardTitle}>Total Distance Covered</Text>
-            <Text style={styles.cardValue}>150 km</Text>
-          </TouchableOpacity>
-        </View>
+          {Object.keys(fieldEventStats).map((eventKey, index) => {
+            const stats = fieldEventStats[eventKey];
+            return (
+              <TouchableOpacity key={index} style={styles.card}>
+                <Text style={styles.cardTitle}>{eventKey.replace(/([A-Z])/g, ' $1').toUpperCase()}</Text>
+                <Text style={styles.cardValue}>Total Distance: {stats.total.toFixed(2)} m</Text>
+                <Text style={styles.cardValue}>Average Distance: {stats.average} m</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
 
         {/* Mini Charts */}
         <View style={styles.section}>
@@ -138,17 +184,17 @@ const styles = StyleSheet.create({
     paddingBottom: 150, // Increased padding to match footer height
     marginTop: 10,
   },
-  summaryContainer: {
+  cardsScrollView: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 20,
   },
   card: {
-    flex: 1,
+    width: width * 0.4, // Adjusted width for each card
     backgroundColor: '#1C1C1C', // Matching card background color
     borderRadius: 12,
     padding: 15,
     marginHorizontal: 5,
+    marginVertical: 10,
     borderColor: '#333',
     borderWidth: 1,
     shadowColor: '#000',
@@ -163,7 +209,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
   },
   cardValue: {
-    fontSize: 18,
+    fontSize: 14,
     color: '#E0E0E0', // Consistent font color
   },
   section: {
@@ -219,23 +265,6 @@ const styles = StyleSheet.create({
   eventItem: {
     fontSize: 16,
     color: '#E0E0E0', // Consistent item color
-    marginBottom: 10,
-  },
-  progressContainer: {
-    backgroundColor: '#1C1C1C', // Matching progress container background color
-    borderRadius: 12,
-    padding: 15,
-    borderColor: '#333',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  progressText: {
-    fontSize: 16,
-    color: '#E0E0E0', // Consistent progress text color
     marginBottom: 10,
   },
   errorText: {

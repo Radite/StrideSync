@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   optionButtonText: {
-    color: '#ffff', // Accent color for option buttons
+    color: '#fff', // Accent color for option buttons
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
   },
