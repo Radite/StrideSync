@@ -62,13 +62,22 @@ const TrainingLogScreen = ({ navigation }) => {
   };
 
   const onDayPress = (day) => {
-    if (!startDate || endDate) {
-      setStartDate(day.dateString);
-      setEndDate('');
-    } else {
-      setEndDate(day.dateString);
+    const selectedDate = day.dateString;
+  
+    if (!startDate || (endDate && selectedDate < startDate)) {
+      // Set start date and reset end date
+      setStartDate(selectedDate);
+      setEndDate(null);
+    } else if (!endDate && selectedDate > startDate) {
+      // Set end date only if it's after start date
+      setEndDate(selectedDate);
+    } else if (startDate && endDate) {
+      // Reset dates if both are set
+      setStartDate(selectedDate);
+      setEndDate(null);
     }
   };
+  
 
   const getMarkedDates = () => {
     const markedDates = {};
