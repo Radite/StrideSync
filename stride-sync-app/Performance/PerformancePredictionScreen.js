@@ -119,7 +119,7 @@ const PerformancePredictionScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <Footer navigation={navigation} />
+      <Footer navigation={navigation} activeScreen="PerformancePrediction" />
     </View>
   );
 };

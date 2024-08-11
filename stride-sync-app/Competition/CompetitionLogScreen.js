@@ -211,7 +211,7 @@ const CompetitionLogScreen = ({ navigation }) => {
         )}
       </ScrollView>
 
-      <Footer navigation={navigation} />
+      <Footer navigation={navigation} activeScreen="CompetitionLog" />
     </View>
   );
 };

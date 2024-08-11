@@ -101,7 +101,7 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
           style={styles.chart}
         />
       </ScrollView>
-      <Footer navigation={navigation} />
+      <Footer navigation={navigation} activeScreen="AdvancedDataVisualization" />
     </View>
   );
 };

@@ -96,7 +96,7 @@ const DashboardScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* Footer component */}
-      <Footer navigation={navigation} />
+      <Footer navigation={navigation} activeScreen="Dashboard" />
     </View>
   );
 };

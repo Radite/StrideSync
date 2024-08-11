@@ -228,7 +228,7 @@ const TrainingLogScreen = ({ navigation }) => {
         <Text style={styles.aiButtonText}>Generate AI Training Program</Text>
       </TouchableOpacity>
 
-      <Footer navigation={navigation} />
+      <Footer navigation={navigation} activeScreen="TrainingLog" />
     </View>
   );
 };
