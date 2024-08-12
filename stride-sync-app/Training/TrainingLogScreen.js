@@ -13,11 +13,13 @@ const TrainingLogScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  // Sample historical data
   const historicalData = [
-    { date: '2024-08-01', distance: '5 miles', time: '45 min', notes: 'Hill training' },
-    { date: '2024-07-28', distance: '3 miles', time: '30 min', notes: 'Speed workout' },
-    { date: '2024-07-25', distance: '10 miles', time: '90 min', notes: 'Long run' },
-    { date: '2024-07-20', distance: '6 miles', time: '55 min', notes: 'Endurance training' },
+    { date: '2024-08-01', event: 'Triple Jump', distance: '15 feet', time: '45 min', notes: 'Good form' },
+    { date: '2024-07-28', event: 'Long Jump', distance: '20 feet', time: '30 min', notes: 'Personal best' },
+    { date: '2024-07-25', event: 'High Jump', distance: '6 feet', time: '90 min', notes: 'Improved technique' },
+    { date: '2024-07-20', event: 'Pole Vault', distance: '14 feet', time: '55 min', notes: 'Good height' },
+    // Add more events as needed
   ];
 
   useEffect(() => {
@@ -57,27 +59,80 @@ const TrainingLogScreen = ({ navigation }) => {
   };
 
   const calculateSummary = () => {
-    const totalDistance = filteredData.reduce((total, session) => {
+    const summaries = {
+      Running: { totalDistance: 0, totalDuration: 0, totalSessions: 0 },
+      Jump: {
+        TripleJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
+        LongJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
+        HighJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 }
+      },
+      Throw: {
+        ShotPut: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
+        Javelin: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
+        Discus: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
+        HammerThrow: { totalDistance: 0, totalThrows: 0, averageThrow: 0 }
+      }
+    };
+  
+    filteredData.forEach(session => {
       const distance = parseFloat(session.distance) || 0;
-      return total + distance;
-    }, 0);
-
-    const totalDuration = filteredData.reduce((total, session) => {
-      const [minutes] = session.time.split(' ');
-      return total + parseFloat(minutes) || 0;
-    }, 0);
-
-    const totalSessions = filteredData.length;
-
-    const averageIntensity = totalSessions > 0 ? (totalDistance / totalSessions).toFixed(2) : 0;
-
+      const time = parseFloat(session.time.split(' ')[0]) || 0;
+  
+      if (session.event === 'Running') {
+        summaries.Running.totalDistance += distance;
+        summaries.Running.totalDuration += time;
+        summaries.Running.totalSessions += 1;
+      } else if (session.event === 'Triple Jump') {
+        summaries.Jump.TripleJump.totalDistance += distance;
+        summaries.Jump.TripleJump.totalJumps += 1;
+      } else if (session.event === 'Long Jump') {
+        summaries.Jump.LongJump.totalDistance += distance;
+        summaries.Jump.LongJump.totalJumps += 1;
+      } else if (session.event === 'High Jump') {
+        summaries.Jump.HighJump.totalDistance += distance;
+        summaries.Jump.HighJump.totalJumps += 1;
+      } else if (session.event === 'Shot Put') {
+        summaries.Throw.ShotPut.totalDistance += distance;
+        summaries.Throw.ShotPut.totalThrows += 1;
+      } else if (session.event === 'Javelin') {
+        summaries.Throw.Javelin.totalDistance += distance;
+        summaries.Throw.Javelin.totalThrows += 1;
+      } else if (session.event === 'Discus') {
+        summaries.Throw.Discus.totalDistance += distance;
+        summaries.Throw.Discus.totalThrows += 1;
+      } else if (session.event === 'Hammer Throw') {
+        summaries.Throw.HammerThrow.totalDistance += distance;
+        summaries.Throw.HammerThrow.totalThrows += 1;
+      }
+    });
+  
+    // Calculate averages
+    Object.keys(summaries.Jump).forEach(key => {
+      const jump = summaries.Jump[key];
+      jump.averageJump = jump.totalJumps > 0 ? (jump.totalDistance / jump.totalJumps).toFixed(2) : 0;
+    });
+  
+    Object.keys(summaries.Throw).forEach(key => {
+      const throwEvent = summaries.Throw[key];
+      throwEvent.averageThrow = throwEvent.totalThrows > 0 ? (throwEvent.totalDistance / throwEvent.totalThrows).toFixed(2) : 0;
+    });
+  
+    // Average intensity for running
+    const averageIntensity = summaries.Running.totalSessions > 0
+      ? (summaries.Running.totalDistance / summaries.Running.totalSessions).toFixed(2)
+      : 0;
+  
     return {
-      totalDistance: totalDistance.toFixed(2),
-      totalDuration: totalDuration.toFixed(2),
-      averageIntensity,
+      Running: {
+        totalDistance: summaries.Running.totalDistance.toFixed(2),
+        totalDuration: summaries.Running.totalDuration.toFixed(2),
+        averageIntensity
+      },
+      Jump: summaries.Jump,
+      Throw: summaries.Throw
     };
   };
-
+  
   const onCustomRangeSelected = () => {
     setCustomRangeVisible(false);
     setDateFilter('custom_range');
@@ -153,27 +208,46 @@ const TrainingLogScreen = ({ navigation }) => {
 
   const summary = calculateSummary();
 
+  const renderSummaryCards = () => {
+    const summary = calculateSummary();
+  
+    return (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryCardTitle}>Running</Text>
+          <Text style={styles.summaryCardDistance}>Distance: {summary.Running.totalDistance} feet</Text>
+          <Text style={styles.summaryCardDistance}>Time: {summary.Running.totalDuration} min</Text>
+          <Text style={styles.summaryCardDistance}>Intensity: {summary.Running.averageIntensity} feet/session</Text>
+        </View>
+  
+        {Object.keys(summary.Jump).map((event) => (
+          <View key={event} style={styles.summaryCard}>
+            <Text style={styles.summaryCardTitle}>{event}</Text>
+            <Text style={styles.summaryCardDistance}>Distance: {summary.Jump[event].totalDistance} feet</Text>
+            <Text style={styles.summaryCardDistance}>Jumps: {summary.Jump[event].totalJumps}</Text>
+            <Text style={styles.summaryCardDistance}>Avg Jump: {summary.Jump[event].averageJump} feet</Text>
+          </View>
+        ))}
+  
+        {Object.keys(summary.Throw).map((event) => (
+          <View key={event} style={styles.summaryCard}>
+            <Text style={styles.summaryCardTitle}>{event}</Text>
+            <Text style={styles.summaryCardDistance}>Distance: {summary.Throw[event].totalDistance} feet</Text>
+            <Text style={styles.summaryCardDistance}>Throws: {summary.Throw[event].totalThrows}</Text>
+            <Text style={styles.summaryCardDistance}>Avg Throw: {summary.Throw[event].averageThrow} feet</Text>
+          </View>
+        ))}
+      </ScrollView>
+    );
+  };
+  
   return (
     <View style={styles.container}>
       <Header title="Training Log" navigation={navigation} />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Summary Section */}
-        <View style={styles.summaryContainer}>
-          <Text style={styles.summaryTitle}>Summary</Text>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Total Distance:</Text>
-            <Text style={styles.summaryValue}>{summary.totalDistance} miles</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Total Duration:</Text>
-            <Text style={styles.summaryValue}>{summary.totalDuration} min</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Average Intensity:</Text>
-            <Text style={styles.summaryValue}>{summary.averageIntensity} miles/session</Text>
-          </View>
-        </View>
+      {/* Render Summary Cards */}
+      {renderSummaryCards()}
 
         <View style={styles.filterContainer}>
           <Text style={styles.filterLabel}>Filter by Date:</Text>
@@ -249,6 +323,7 @@ const TrainingLogScreen = ({ navigation }) => {
             filteredData.map((session, index) => (
               <View key={index} style={styles.sessionContainer}>
                 <Text style={styles.sessionDate}>{session.date}</Text>
+                <Text style={styles.sessionDetail}>Event: {session.event}</Text>
                 <Text style={styles.sessionDetail}>Distance: {session.distance}</Text>
                 <Text style={styles.sessionDetail}>Time: {session.time}</Text>
                 <Text style={styles.sessionDetail}>Notes: {session.notes}</Text>
@@ -273,7 +348,78 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 10,
     paddingBottom: 10,
-    marginTop: 10
+    marginTop: 10,
+  },
+  horizontalScroll: {
+    marginBottom: 20,
+  },
+  summaryCard: {
+    backgroundColor: '#1C1C1C',
+    padding: 15,
+    borderRadius: 12,
+    marginRight: 10,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+    width: 300,
+    height: 100,
+  },
+  summaryCardTitle: {
+    fontSize: 16,
+    color: '#FFB74D',
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 10,
+  },
+  summaryCardDistance: {
+    fontSize: 14,
+    color: '#E0E0E0',
+    fontFamily: 'Montserrat-Regular',
+    marginBottom: 5,
+  },
+  summaryCardTime: {
+    fontSize: 14,
+    color: '#E0E0E0',
+    fontFamily: 'Montserrat-Regular',
+  },
+  summaryContainer: {
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    backgroundColor: '#1C1C1C',
+    padding: 15,
+    borderRadius: 12,
+    marginTop: 10,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    color: '#FFB74D',
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 10,
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#E0E0E0',
+    fontFamily: 'Montserrat-Regular',
+  },
+  summaryValue: {
+    fontSize: 16,
+    color: '#FFB74D',
+    fontFamily: 'Montserrat-Bold',
   },
   filterContainer: {
     paddingHorizontal: 10,
@@ -467,42 +613,6 @@ const styles = StyleSheet.create({
   aiButtonText: {
     fontSize: 18,
     color: '#0A0A0A',
-    fontFamily: 'Montserrat-Bold',
-  },
-  summaryContainer: {
-    paddingHorizontal: 10,
-    marginBottom: 20,
-    backgroundColor: '#1C1C1C',
-    padding: 15,
-    borderRadius: 12,
-    marginTop: 10,
-    borderColor: '#333',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    color: '#FFB74D',
-    fontFamily: 'Montserrat-Bold',
-    marginBottom: 10,
-  },
-  summaryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    color: '#E0E0E0',
-    fontFamily: 'Montserrat-Regular',
-  },
-  summaryValue: {
-    fontSize: 16,
-    color: '#FFB74D',
     fontFamily: 'Montserrat-Bold',
   },
 });
