@@ -108,92 +108,122 @@ const LogTraining = ({ navigation }) => {
     const trainingType = "Interval"; // Example training type
     const notes = "Training session went well."; // Example notes
     
-    // Convert distances directly in the payload calculation
-    const EventDetails = trainingLogs.map(log => ({
-      EventType: log.eventType,
-      Event: convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
-      Reps: log.reps,
-      Marks: log.marks.map(mark => ({ Mark: mark })),
-      TotalDistance: log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
-      TotalTime: log.marks.reduce((sum, mark) => sum + parseFloat(mark) || 0, 0), // Sum of marks as numbers
-    }));
-    
-    // Calculate TotalDistanceRan
-    const TotalDistanceRan = EventDetails
-      .filter(detail => detail.EventType === 'running')  // Adjust filter if needed for running events
-      .reduce((total, detail) => total + detail.TotalDistance, 0);
-    
-    const TotalTimeRan = EventDetails
-      .filter(detail => detail.EventType === 'running')  // Filter events with EventType 'running'
-      .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for these events
+      // Process training logs to calculate event details
+  const EventDetails = trainingLogs.map(log => ({
+    EventType: log.eventType,
+    Event: convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
+    Reps: log.reps,
+    Marks: log.marks.map(mark => ({ Mark: mark })),
+    TotalDistance: log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
+    TotalTime: log.marks.reduce((sum, mark) => sum + parseFloat(mark) || 0, 0), // Sum of marks as numbers
+  }));
 
-    const payload = {
-      AthleteID: 1,
-      SessionDate: formattedDate,
-      SessionType: trainingType,
-      EventDetails: EventDetails,
-      SpecialConditions: {
-        Surface: trainingLogs[0]?.spikes ? 'Spikes' : 'No Spikes',
-      },
-      IntensityPercentage: 0, // Placeholder for intensity
-      Notes: notes,
-      TotalDistanceHighJumped: trainingLogs
-        .filter(log => log.subEvent === 'high_jump')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceLongJumped: trainingLogs
-        .filter(log => log.subEvent === 'long_jump')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistancePoleVaulted: trainingLogs
-        .filter(log => log.subEvent === 'pole_vault')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceShotPut: trainingLogs
-        .filter(log => log.subEvent === 'shot_put')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceDiscusThrown: trainingLogs
-        .filter(log => log.subEvent === 'discus')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceJavelinThrown: trainingLogs
-        .filter(log => log.subEvent === 'javelin')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceHammerThrown: trainingLogs
-        .filter(log => log.subEvent === 'hammer')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceTripleJumped: trainingLogs
-        .filter(log => log.subEvent === 'triple_jump')
-        .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-      TotalDistanceRan: TotalDistanceRan,
-      TotalTimeRan: TotalTimeRan,
-      NumberOfLongJumps: trainingLogs.filter(log => log.subEvent === 'long_jump').length,
-      NumberOfHighJumps: trainingLogs.filter(log => log.subEvent === 'high_jump').length,
-      NumberOfPoleVaults: trainingLogs.filter(log => log.subEvent === 'pole_vault').length,
-      NumberOfShotPuts: trainingLogs.filter(log => log.subEvent === 'shot_put').length,
-      NumberOfDiscusThrows: trainingLogs.filter(log => log.subEvent === 'discus').length,
-      NumberOfJavelinThrows: trainingLogs.filter(log => log.subEvent === 'javelin').length,
-      NumberOfHammerThrows: trainingLogs.filter(log => log.subEvent === 'hammer').length,
-      NumberOfTripleJumps: trainingLogs.filter(log => log.subEvent === 'triple_jump').length,
-    };
-    
-    // Output the payload
-    console.log(payload);
-    
-  
-    fetch('http://192.168.100.71:3000/api/training-sessions/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Success:', data);
-      // Handle success (e.g., navigate to another screen or show a success message)
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      // Handle error (e.g., show an error message)
-    });
+  // Calculate TotalDistanceRan and TotalTimeRan
+  const TotalDistanceRan = EventDetails
+    .filter(detail => detail.EventType === 'running')  // Filter for running events
+    .reduce((total, detail) => total + detail.TotalDistance, 0);
+
+  const TotalTimeRan = EventDetails
+    .filter(detail => detail.EventType === 'running')  // Filter for running events
+    .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for running events
+
+  // Payload for training session details
+  const trainingPayload = {
+    AthleteID: 1,
+    SessionDate: formattedDate,
+    SessionType: trainingType,
+    EventDetails: EventDetails,
+    SpecialConditions: {
+      Surface: trainingLogs[0]?.spikes ? 'Spikes' : 'No Spikes',
+    },
+    IntensityPercentage: 0, // Placeholder for intensity
+    Notes: notes,
+    TotalDistanceHighJumped: trainingLogs
+      .filter(log => log.subEvent === 'high_jump')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceLongJumped: trainingLogs
+      .filter(log => log.subEvent === 'long_jump')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistancePoleVaulted: trainingLogs
+      .filter(log => log.subEvent === 'pole_vault')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceShotPut: trainingLogs
+      .filter(log => log.subEvent === 'shot_put')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceDiscusThrown: trainingLogs
+      .filter(log => log.subEvent === 'discus')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceJavelinThrown: trainingLogs
+      .filter(log => log.subEvent === 'javelin')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceHammerThrown: trainingLogs
+      .filter(log => log.subEvent === 'hammer')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceTripleJumped: trainingLogs
+      .filter(log => log.subEvent === 'triple_jump')
+      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+    TotalDistanceRan: TotalDistanceRan,
+    TotalTimeRan: TotalTimeRan,
+    NumberOfLongJumps: trainingLogs.filter(log => log.subEvent === 'long_jump').length,
+    NumberOfHighJumps: trainingLogs.filter(log => log.subEvent === 'high_jump').length,
+    NumberOfPoleVaults: trainingLogs.filter(log => log.subEvent === 'pole_vault').length,
+    NumberOfShotPuts: trainingLogs.filter(log => log.subEvent === 'shot_put').length,
+    NumberOfDiscusThrows: trainingLogs.filter(log => log.subEvent === 'discus').length,
+    NumberOfJavelinThrows: trainingLogs.filter(log => log.subEvent === 'javelin').length,
+    NumberOfHammerThrows: trainingLogs.filter(log => log.subEvent === 'hammer').length,
+    NumberOfTripleJumps: trainingLogs.filter(log => log.subEvent === 'triple_jump').length,
   };
+
+  // Payload for profile update with only TotalDistanceRan and TotalTimeRan
+  const profileUpdatePayload = {
+    AthleteID: 1,
+    TotalDistanceRan: TotalDistanceRan,
+    TotalTimeRan: TotalTimeRan,
+  };
+
+  // Submit training session details
+  fetch('http://192.168.100.71:3000/api/training-sessions/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(trainingPayload),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Training session submitted successfully:', data);
+
+    // Fetch the current profile to get existing values
+    return fetch(`http://192.168.100.71:3000/api/athlete-profiles/${profileUpdatePayload.AthleteID}`)
+      .then(response => response.json())
+      .then(profileData => {
+        // Calculate new totals
+        const updatedProfilePayload = {
+          AthleteID: profileUpdatePayload.AthleteID,
+          TotalDistanceRan: (profileData.TotalDistanceRan || 0) + TotalDistanceRan,
+          TotalTimeRan: (profileData.TotalTimeRan || 0) + TotalTimeRan,
+        };
+
+        // Update athlete profile with new totals
+        return fetch(`http://192.168.100.71:3000/api/athlete-profiles/${updatedProfilePayload.AthleteID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedProfilePayload),
+        });
+      });
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Athlete profile updated successfully:', data);
+    // Handle success (e.g., navigate to another screen or show a success message)
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    // Handle error (e.g., show an error message)
+  });
+};
   
   return (
     <View style={styles.container}>
