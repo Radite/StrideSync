@@ -4,6 +4,7 @@ import Footer from '../Footer';
 import Header from '../Header'; 
 import { format, startOfWeek, endOfWeek, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
+import axios from 'axios'; // Make sure axios is installed
 
 const TrainingLogScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,127 +13,154 @@ const TrainingLogScreen = ({ navigation }) => {
   const [customRangeVisible, setCustomRangeVisible] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [historicalData, setHistoricalData] = useState([]);
 
-  // Sample historical data
-  const historicalData = [
-    { date: '2024-08-01', event: 'Triple Jump', distance: '15 feet', time: '45 min', notes: 'Good form' },
-    { date: '2024-07-28', event: 'Long Jump', distance: '20 feet', time: '30 min', notes: 'Personal best' },
-    { date: '2024-07-25', event: 'High Jump', distance: '6 feet', time: '90 min', notes: 'Improved technique' },
-    { date: '2024-07-20', event: 'Pole Vault', distance: '14 feet', time: '55 min', notes: 'Good height' },
-    // Add more events as needed
-  ];
+  useEffect(() => {
+    // Fetch data from API
+    axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1')
+      .then(response => {
+        setHistoricalData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
   useEffect(() => {
     filterData();
-  }, [searchQuery, dateFilter, startDate, endDate]);
+  }, [searchQuery, dateFilter, startDate, endDate, historicalData]);
+// Function to filter data
+const filterData = () => {
+  const startDateWeek = startOfWeek(new Date());
+  const endDateWeek = endOfWeek(new Date());
 
-  const filterData = () => {
-    const startDateWeek = startOfWeek(new Date());
-    const endDateWeek = endOfWeek(new Date());
+  const filtered = historicalData.filter(session => {
+    const sessionDate = new Date(session.SessionDate);
 
-    const filtered = historicalData.filter(session => {
-      const sessionDate = new Date(session.date);
+    let withinDateRange = true;
+    if (dateFilter === 'this_week') {
+      withinDateRange = sessionDate >= startDateWeek && sessionDate <= endDateWeek;
+    } else if (dateFilter === 'last_week') {
+      const start = subDays(startDateWeek, 7);
+      const end = subDays(endDateWeek, 7);
+      withinDateRange = sessionDate >= start && sessionDate <= end;
+    } else if (dateFilter === 'last_month') {
+      const start = startOfMonth(subMonths(new Date(), 1));
+      const end = endOfMonth(subMonths(new Date(), 1));
+      withinDateRange = sessionDate >= start && sessionDate <= end;
+    } else if (dateFilter === 'custom_range') {
+      withinDateRange = sessionDate >= new Date(startDate) && sessionDate <= new Date(endDate);
+    }
 
-      let withinDateRange = true;
-      if (dateFilter === 'this_week') {
-        withinDateRange = sessionDate >= startDateWeek && sessionDate <= endDateWeek;
-      } else if (dateFilter === 'last_week') {
-        const start = subDays(startDateWeek, 7);
-        const end = subDays(endDateWeek, 7);
-        withinDateRange = sessionDate >= start && sessionDate <= end;
-      } else if (dateFilter === 'last_month') {
-        const start = startOfMonth(subMonths(new Date(), 1));
-        const end = endOfMonth(subMonths(new Date(), 1));
-        withinDateRange = sessionDate >= start && sessionDate <= end;
-      } else if (dateFilter === 'custom_range') {
-        withinDateRange = sessionDate >= new Date(startDate) && sessionDate <= new Date(endDate);
-      }
+    const queryLowerCase = searchQuery.toLowerCase();
+    const matchesQuery = session.SessionType.toLowerCase().includes(queryLowerCase) ||
+                          session.Notes.toLowerCase().includes(queryLowerCase) ||
+                          session.EventDetails.some(event => event.Event.toLowerCase().includes(queryLowerCase));
 
-      const matchesQuery = session.distance.includes(searchQuery) ||
-                           session.time.includes(searchQuery) ||
-                           session.notes.toLowerCase().includes(searchQuery.toLowerCase());
+    return withinDateRange && matchesQuery;
+  });
 
-      return withinDateRange && matchesQuery;
-    });
+  setFilteredData(filtered);
+};
 
-    setFilteredData(filtered);
-  };
+const eventNameMapping = {
+  HighJump: 'High Jump',
+  LongJump: 'Long Jump',
+  PoleVault: 'Pole Vault',
+  TripleJump: 'Triple Jump',
+  ShotPut: 'Shot Put',
+  Discus: 'Discus',
+  Javelin: 'Javelin',
+  HammerThrow: 'Hammer Throw'
+};
 
+  // Function to calculate summary
   const calculateSummary = () => {
     const summaries = {
       Running: { totalDistance: 0, totalDuration: 0, totalSessions: 0 },
       Jump: {
-        TripleJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
+        HighJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
         LongJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
-        HighJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 }
+        PoleVault: { totalDistance: 0, totalJumps: 0, averageJump: 0 },
+        TripleJump: { totalDistance: 0, totalJumps: 0, averageJump: 0 }
       },
       Throw: {
         ShotPut: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
-        Javelin: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
         Discus: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
+        Javelin: { totalDistance: 0, totalThrows: 0, averageThrow: 0 },
         HammerThrow: { totalDistance: 0, totalThrows: 0, averageThrow: 0 }
       }
     };
-  
+
     filteredData.forEach(session => {
-      const distance = parseFloat(session.distance) || 0;
-      const time = parseFloat(session.time.split(' ')[0]) || 0;
-  
-      if (session.event === 'Running') {
-        summaries.Running.totalDistance += distance;
-        summaries.Running.totalDuration += time;
+      const { TotalDistanceRan, TotalTimeRan, TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted, TotalDistanceTripleJumped, TotalDistanceShotPut, TotalDistanceDiscusThrown, TotalDistanceJavelinThrown, TotalDistanceHammerThrown, NumberOfHighJumps, NumberOfLongJumps, NumberOfPoleVaults, NumberOfTripleJumps, NumberOfShotPuts, NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows } = session;
+
+      if (TotalDistanceRan) {
+        summaries.Running.totalDistance += TotalDistanceRan;
+        summaries.Running.totalDuration += TotalTimeRan;
         summaries.Running.totalSessions += 1;
-      } else if (session.event === 'Triple Jump') {
-        summaries.Jump.TripleJump.totalDistance += distance;
-        summaries.Jump.TripleJump.totalJumps += 1;
-      } else if (session.event === 'Long Jump') {
-        summaries.Jump.LongJump.totalDistance += distance;
-        summaries.Jump.LongJump.totalJumps += 1;
-      } else if (session.event === 'High Jump') {
-        summaries.Jump.HighJump.totalDistance += distance;
-        summaries.Jump.HighJump.totalJumps += 1;
-      } else if (session.event === 'Shot Put') {
-        summaries.Throw.ShotPut.totalDistance += distance;
-        summaries.Throw.ShotPut.totalThrows += 1;
-      } else if (session.event === 'Javelin') {
-        summaries.Throw.Javelin.totalDistance += distance;
-        summaries.Throw.Javelin.totalThrows += 1;
-      } else if (session.event === 'Discus') {
-        summaries.Throw.Discus.totalDistance += distance;
-        summaries.Throw.Discus.totalThrows += 1;
-      } else if (session.event === 'Hammer Throw') {
-        summaries.Throw.HammerThrow.totalDistance += distance;
-        summaries.Throw.HammerThrow.totalThrows += 1;
+      }
+      if (TotalDistanceHighJumped) {
+        summaries.Jump.HighJump.totalDistance += TotalDistanceHighJumped;
+        summaries.Jump.HighJump.totalJumps += NumberOfHighJumps;
+      }
+      if (TotalDistanceLongJumped) {
+        summaries.Jump.LongJump.totalDistance += TotalDistanceLongJumped;
+        summaries.Jump.LongJump.totalJumps += NumberOfLongJumps;
+      }
+      if (TotalDistancePoleVaulted) {
+        summaries.Jump.PoleVault.totalDistance += TotalDistancePoleVaulted;
+        summaries.Jump.PoleVault.totalJumps += NumberOfPoleVaults;
+      }
+      if (TotalDistanceTripleJumped) {
+        summaries.Jump.TripleJump.totalDistance += TotalDistanceTripleJumped;
+        summaries.Jump.TripleJump.totalJumps += NumberOfTripleJumps;
+      }
+      if (TotalDistanceShotPut) {
+        summaries.Throw.ShotPut.totalDistance += TotalDistanceShotPut;
+        summaries.Throw.ShotPut.totalThrows += NumberOfShotPuts;
+      }
+      if (TotalDistanceDiscusThrown) {
+        summaries.Throw.Discus.totalDistance += TotalDistanceDiscusThrown;
+        summaries.Throw.Discus.totalThrows += NumberOfDiscusThrows;
+      }
+      if (TotalDistanceJavelinThrown) {
+        summaries.Throw.Javelin.totalDistance += TotalDistanceJavelinThrown;
+        summaries.Throw.Javelin.totalThrows += NumberOfJavelinThrows;
+      }
+      if (TotalDistanceHammerThrown) {
+        summaries.Throw.HammerThrow.totalDistance += TotalDistanceHammerThrown;
+        summaries.Throw.HammerThrow.totalThrows += NumberOfHammerThrows;
       }
     });
-  
+
     // Calculate averages
     Object.keys(summaries.Jump).forEach(key => {
       const jump = summaries.Jump[key];
       jump.averageJump = jump.totalJumps > 0 ? (jump.totalDistance / jump.totalJumps).toFixed(2) : 0;
     });
-  
+
     Object.keys(summaries.Throw).forEach(key => {
       const throwEvent = summaries.Throw[key];
       throwEvent.averageThrow = throwEvent.totalThrows > 0 ? (throwEvent.totalDistance / throwEvent.totalThrows).toFixed(2) : 0;
     });
-  
-    // Average intensity for running
-    const averageIntensity = summaries.Running.totalSessions > 0
-      ? (summaries.Running.totalDistance / summaries.Running.totalSessions).toFixed(2)
+
+    // Average Avg Speed for running
+    const averageSpeed = summaries.Running.totalSessions > 0
+      ? (summaries.Running.totalDistance / summaries.Running.totalDuration).toFixed(2)
       : 0;
-  
+
     return {
       Running: {
         totalDistance: summaries.Running.totalDistance.toFixed(2),
         totalDuration: summaries.Running.totalDuration.toFixed(2),
-        averageIntensity
+        averageSpeed
       },
       Jump: summaries.Jump,
       Throw: summaries.Throw
     };
   };
-  
+
   const onCustomRangeSelected = () => {
     setCustomRangeVisible(false);
     setDateFilter('custom_range');
@@ -198,56 +226,77 @@ const TrainingLogScreen = ({ navigation }) => {
     setDateFilter('custom_range');
   };
 
-  const setLastMonth = () => {
-    const lastMonthStart = format(startOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd');
-    const lastMonthEnd = format(endOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd');
-    setStartDate(lastMonthStart);
-    setEndDate(lastMonthEnd);
+  const setAllTime = () => {
+    // Set a far past date and current date as end date
+    const allTimeStartDate = '2000-01-01'; // or use a dynamic start date based on your data
+    const allTimeEndDate = format(new Date(), 'yyyy-MM-dd');
+  
+    setStartDate(allTimeStartDate);
+    setEndDate(allTimeEndDate);
     setDateFilter('custom_range');
   };
+  
 
   const summary = calculateSummary();
 
   const renderSummaryCards = () => {
-    const summary = calculateSummary();
-  
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryCardTitle}>Running</Text>
-          <Text style={styles.summaryCardDistance}>Distance: {summary.Running.totalDistance} feet</Text>
-          <Text style={styles.summaryCardDistance}>Time: {summary.Running.totalDuration} min</Text>
-          <Text style={styles.summaryCardDistance}>Intensity: {summary.Running.averageIntensity} feet/session</Text>
+          <Text style={styles.summaryCardDistance}>Distance: {summary.Running.totalDistance} metres</Text>
+          <Text style={styles.summaryCardDistance}>Time: {summary.Running.totalDuration} seconds</Text>
+          <Text style={styles.summaryCardDistance}>Avg Speed: {summary.Running.averageSpeed} m/s</Text>
         </View>
-  
+
         {Object.keys(summary.Jump).map((event) => (
           <View key={event} style={styles.summaryCard}>
-            <Text style={styles.summaryCardTitle}>{event}</Text>
-            <Text style={styles.summaryCardDistance}>Distance: {summary.Jump[event].totalDistance} feet</Text>
+            <Text style={styles.summaryCardTitle}>{eventNameMapping[event]}</Text>
+            <Text style={styles.summaryCardDistance}>Distance: {summary.Jump[event].totalDistance} metres</Text>
             <Text style={styles.summaryCardDistance}>Jumps: {summary.Jump[event].totalJumps}</Text>
-            <Text style={styles.summaryCardDistance}>Avg Jump: {summary.Jump[event].averageJump} feet</Text>
+            <Text style={styles.summaryCardDistance}>Avg Jump: {summary.Jump[event].averageJump} metres</Text>
           </View>
         ))}
-  
+
         {Object.keys(summary.Throw).map((event) => (
           <View key={event} style={styles.summaryCard}>
-            <Text style={styles.summaryCardTitle}>{event}</Text>
-            <Text style={styles.summaryCardDistance}>Distance: {summary.Throw[event].totalDistance} feet</Text>
+            <Text style={styles.summaryCardTitle}>{eventNameMapping[event]}</Text>
+            <Text style={styles.summaryCardDistance}>Distance: {summary.Throw[event].totalDistance} metres</Text>
             <Text style={styles.summaryCardDistance}>Throws: {summary.Throw[event].totalThrows}</Text>
-            <Text style={styles.summaryCardDistance}>Avg Throw: {summary.Throw[event].averageThrow} feet</Text>
+            <Text style={styles.summaryCardDistance}>Avg Throw: {summary.Throw[event].averageThrow} metres</Text>
           </View>
         ))}
       </ScrollView>
     );
   };
-  
+
+// Update the renderSessionHistory function
+const renderSessionHistory = () => {
+  return filteredData.map((session, index) => {
+    // Extract event details
+    const events = session.EventDetails.map(event => event.Event).join(', ');
+
+    return (
+      <TouchableOpacity
+        key={index}
+        style={styles.sessionContainer}
+        onPress={() => navigation.navigate('TrainingSessionDetails', { sessionId: session.SessionID })}
+      >
+        <Text style={styles.sessionDate}>{format(new Date(session.SessionDate), 'MMM dd, yyyy')}</Text>
+        <Text style={styles.summaryCardDistance}>Session Type: {session.SessionType}</Text>
+        <Text style={styles.summaryCardDistance}>Events: {events}</Text>
+        <Text style={styles.summaryCardDistance}>Notes: {session.Notes}</Text>
+      </TouchableOpacity>
+    );
+  });
+};
   return (
     <View style={styles.container}>
       <Header title="Training Log" navigation={navigation} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-      {/* Render Summary Cards */}
-      {renderSummaryCards()}
+        {/* Render Summary Cards */}
+        {renderSummaryCards()}
 
         <View style={styles.filterContainer}>
           <Text style={styles.filterLabel}>Filter by Date:</Text>
@@ -262,8 +311,8 @@ const TrainingLogScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.quickLink} onPress={setLastWeek}>
               <Text style={styles.quickLinkText}>Last Week</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.quickLink} onPress={setLastMonth}>
-              <Text style={styles.quickLinkText}>Last Month</Text>
+            <TouchableOpacity style={styles.quickLink} onPress={setAllTime}>
+              <Text style={styles.quickLinkText}>All Time</Text>
             </TouchableOpacity>
           </View>
 
@@ -273,11 +322,11 @@ const TrainingLogScreen = ({ navigation }) => {
           >
             <Text style={styles.filterText}>
               {dateFilter === 'custom_range'
-                ? `${format(new Date(startDate), 'MMM dd')} - ${format(new Date(endDate), 'MMM dd')}`
+                ? `${format(new Date(startDate), 'MMM dd, yyyy')} - ${format(new Date(endDate), 'MMM dd, yyyy')}`
                 : 'Select Range'}
             </Text>
             <Text style={styles.arrow}>▼</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> 
 
           {customRangeVisible && (
             <View style={styles.calendarContainer}>
@@ -320,15 +369,7 @@ const TrainingLogScreen = ({ navigation }) => {
           </View>
 
           {filteredData.length > 0 ? (
-            filteredData.map((session, index) => (
-              <View key={index} style={styles.sessionContainer}>
-                <Text style={styles.sessionDate}>{session.date}</Text>
-                <Text style={styles.sessionDetail}>Event: {session.event}</Text>
-                <Text style={styles.sessionDetail}>Distance: {session.distance}</Text>
-                <Text style={styles.sessionDetail}>Time: {session.time}</Text>
-                <Text style={styles.sessionDetail}>Notes: {session.notes}</Text>
-              </View>
-            ))
+            renderSessionHistory()
           ) : (
             <Text style={styles.noResultsText}>No results found.</Text>
           )}
@@ -366,16 +407,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     width: 300,
-    height: 100,
+    height: 115,
   },
   summaryCardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#FFB74D',
     fontFamily: 'Montserrat-Bold',
     marginBottom: 10,
   },
   summaryCardDistance: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#E0E0E0',
     fontFamily: 'Montserrat-Regular',
     marginBottom: 5,

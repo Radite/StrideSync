@@ -20,7 +20,7 @@ import PerformancePredictionScreen from './Performance/PerformancePredictionScre
 import CompetitionLogScreen from './Competition/CompetitionLogScreen';
 import LogCompetitionScreen from './Competition/LogCompetitionScreen';
 import AdvancedDataVisualizationScreen from './Analytics/AdvancedDataVisualizationScreen';
-
+import TrainingSessionDetailsScreen from './Training/TrainingSessionDetailsScreen';
 const Stack = createStackNavigator();
 
 const AppLoadingScreen = () => (
@@ -91,6 +91,7 @@ const App = () => {
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="TrainingLog" component={TrainingLogScreen} />
           <Stack.Screen name="LogTraining" component={LogTraining} />
+          <Stack.Screen name="TrainingSessionDetails" component={TrainingSessionDetailsScreen} />
           <Stack.Screen name="PerformancePrediction" component={PerformancePredictionScreen} />
           <Stack.Screen name="CompetitionLog" component={CompetitionLogScreen} />
           <Stack.Screen name="LogCompetition" component={LogCompetitionScreen} />
