@@ -1,10 +1,13 @@
-// TrainingSessionDetailsScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Dimensions } from 'react-native';
 import axios from 'axios';
 import { format } from 'date-fns';
+import Header from '../Header'; // Adjust the import path as needed
+import Footer from '../Footer'; // Adjust the import path as needed
 
-const TrainingSessionDetailsScreen = ({ route }) => {
+const { width } = Dimensions.get('window');
+
+const TrainingSessionDetailsScreen = ({ route, navigation }) => {
   const { sessionId } = route.params;
   const [sessionDetails, setSessionDetails] = useState(null);
 
@@ -21,9 +24,13 @@ const TrainingSessionDetailsScreen = ({ route }) => {
 
   if (!sessionDetails) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <Header title="Training Session" navigation={navigation} />
+        <View style={styles.content}>
+          <Text style={styles.errorText}>Loading...</Text>
+        </View>
+        <Footer navigation={navigation} activeScreen="TrainingLog" />
+      </SafeAreaView>
     );
   }
 
@@ -37,36 +44,101 @@ const TrainingSessionDetailsScreen = ({ route }) => {
   } = sessionDetails;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Training Session Details</Text>
-      <Text style={styles.detail}>Date: {format(new Date(SessionDate), 'MMM dd, yyyy')}</Text>
-      <Text style={styles.detail}>Type: {SessionType}</Text>
-      <Text style={styles.detail}>Intensity: {IntensityPercentage}%</Text>
-      <Text style={styles.detail}>Notes: {Notes}</Text>
-      <Text style={styles.header}>Event Details</Text>
-      {EventDetails.map((event, index) => (
-        <View key={index} style={styles.eventContainer}>
-          <Text style={styles.event}>Event: {event.Event}</Text>
-          <Text style={styles.event}>Reps: {event.Reps}</Text>
-          <Text style={styles.event}>Sets: {event.Sets}</Text>
-          <Text style={styles.event}>Time: {event.Time}</Text>
+    <SafeAreaView style={styles.container}>
+      <Header title="Training Session" navigation={navigation} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Training Session Details</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Date</Text>
+            <Text style={styles.cardValue}>{format(new Date(SessionDate), 'MMM dd, yyyy')}</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Type</Text>
+            <Text style={styles.cardValue}>{SessionType}</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Intensity</Text>
+            <Text style={styles.cardValue}>{IntensityPercentage}%</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Notes</Text>
+            <Text style={styles.cardValue}>{Notes}</Text>
+          </View>
         </View>
-      ))}
-      <Text style={styles.header}>Special Conditions</Text>
-      <Text style={styles.detail}>Surface: {SpecialConditions.Surface}</Text>
-      <Text style={styles.detail}>Weather: {SpecialConditions.Weather}</Text>
-      <Text style={styles.header}>Totals</Text>
-      <Text style={styles.detail}>Total Distance Ran: {TotalDistanceRan} metres</Text>
-      <Text style={styles.detail}>Total Time Ran: {TotalTimeRan} seconds</Text>
-      <Text style={styles.detail}>High Jumps: {NumberOfHighJumps} (Total Distance: {TotalDistanceHighJumped} metres)</Text>
-      <Text style={styles.detail}>Long Jumps: {NumberOfLongJumps} (Total Distance: {TotalDistanceLongJumped} metres)</Text>
-      <Text style={styles.detail}>Pole Vaults: {NumberOfPoleVaults} (Total Distance: {TotalDistancePoleVaulted} metres)</Text>
-      <Text style={styles.detail}>Triple Jumps: {NumberOfTripleJumps} (Total Distance: {TotalDistanceTripleJumped} metres)</Text>
-      <Text style={styles.detail}>Shot Puts: {NumberOfShotPuts} (Total Distance: {TotalDistanceShotPut} metres)</Text>
-      <Text style={styles.detail}>Discus Throws: {NumberOfDiscusThrows} (Total Distance: {TotalDistanceDiscusThrown} metres)</Text>
-      <Text style={styles.detail}>Javelin Throws: {NumberOfJavelinThrows} (Total Distance: {TotalDistanceJavelinThrown} metres)</Text>
-      <Text style={styles.detail}>Hammer Throws: {NumberOfHammerThrows} (Total Distance: {TotalDistanceHammerThrown} metres)</Text>
-    </ScrollView>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Event Details</Text>
+          <View style={styles.eventList}>
+            {EventDetails.map((event, index) => (
+              <View key={index} style={styles.eventItem}>
+                <Text>Event: {event.Event}</Text>
+                <Text>Reps: {event.Reps}</Text>
+                <Text>Sets: {event.Sets}</Text>
+                <Text>Time: {event.Time}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Special Conditions</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Surface</Text>
+            <Text style={styles.cardValue}>{SpecialConditions.Surface}</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Weather</Text>
+            <Text style={styles.cardValue}>{SpecialConditions.Weather}</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Totals</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Total Distance Ran</Text>
+            <Text style={styles.cardValue}>{TotalDistanceRan} metres</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Total Time Ran</Text>
+            <Text style={styles.cardValue}>{TotalTimeRan} seconds</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>High Jumps</Text>
+            <Text style={styles.cardValue}>{NumberOfHighJumps} (Total Distance: {TotalDistanceHighJumped} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Long Jumps</Text>
+            <Text style={styles.cardValue}>{NumberOfLongJumps} (Total Distance: {TotalDistanceLongJumped} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Pole Vaults</Text>
+            <Text style={styles.cardValue}>{NumberOfPoleVaults} (Total Distance: {TotalDistancePoleVaulted} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Triple Jumps</Text>
+            <Text style={styles.cardValue}>{NumberOfTripleJumps} (Total Distance: {TotalDistanceTripleJumped} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Shot Puts</Text>
+            <Text style={styles.cardValue}>{NumberOfShotPuts} (Total Distance: {TotalDistanceShotPut} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Discus Throws</Text>
+            <Text style={styles.cardValue}>{NumberOfDiscusThrows} (Total Distance: {TotalDistanceDiscusThrown} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Javelin Throws</Text>
+            <Text style={styles.cardValue}>{NumberOfJavelinThrows} (Total Distance: {TotalDistanceJavelinThrown} metres)</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Hammer Throws</Text>
+            <Text style={styles.cardValue}>{NumberOfHammerThrows} (Total Distance: {TotalDistanceHammerThrown} metres)</Text>
+          </View>
+        </View>
+      </ScrollView>
+      <Footer navigation={navigation} activeScreen="TrainingLog" />
+    </SafeAreaView>
   );
 };
 
@@ -74,34 +146,94 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0A0A0A',
-    padding: 10,
   },
-  header: {
+  content: {
+    paddingHorizontal: 10,
+    paddingBottom: 150,
+    marginTop: 10,
+  },
+  cardsScrollView: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  card: {
+    width: width * 0.5,
+    backgroundColor: '#1C1C1C',
+    borderRadius: 12,
+    padding: 15,
+    marginHorizontal: 5,
+    marginVertical: 10,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 16,
+    color: '#F0F0F0',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  cardValue: {
+    fontSize: 14,
+    color: '#E0E0E0',
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
     fontSize: 22,
-    color: '#FFB74D',
-    marginBottom: 10,
     fontFamily: 'Montserrat-Bold',
+    color: '#FFB74D',
+    marginBottom: 15,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
   },
-  detail: {
+  chart: {
+    marginVertical: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  quoteText: {
+    fontSize: 18,
+    color: '#E0E0E0',
+    marginTop: 30,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingHorizontal: 15,
+  },
+  eventList: {
+    backgroundColor: '#1C1C1C',
+    borderRadius: 12,
+    padding: 15,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  eventItem: {
     fontSize: 16,
     color: '#E0E0E0',
-    marginBottom: 5,
-    fontFamily: 'Montserrat-Regular',
-  },
-  eventContainer: {
     marginBottom: 10,
   },
-  event: {
+  errorText: {
+    color: '#E0E0E0',
     fontSize: 16,
-    color: '#E0E0E0',
-    marginBottom: 5,
-    fontFamily: 'Montserrat-Regular',
-  },
-  loadingText: {
-    color: '#E0E0E0',
-    fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontFamily: 'Montserrat-Bold',
+    color: '#FFB74D',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
 
