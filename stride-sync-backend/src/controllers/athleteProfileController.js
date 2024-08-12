@@ -24,11 +24,99 @@ exports.getProfileById = async (req, res) => {
 
 // Create a new profile
 exports.createProfile = async (req, res) => {
-  const { UserID, PrimaryEvent, SecondaryEvent, PersonalBests, TrainingExperience, PeakTiming, SeasonStart, AvailableEquipment, Strengths, Weaknesses } = req.body;
+  const { 
+    UserID, 
+    PrimaryEvent, 
+    SecondaryEvent, 
+    PersonalBests, 
+    TrainingExperience, 
+    PeakTiming, 
+    SeasonStart, 
+    AvailableEquipment, 
+    Strengths, 
+    Weaknesses, 
+    TotalTimesTripleJump = 0, 
+    TotalDistanceRan = 0, 
+    TotalTimeRan = 0, 
+    TotalTimesLongJumped = 0, 
+    TotalTimesHighJumped = 0, 
+    TotalTimesShotPut = 0, 
+    TotalTimesDiscusThrown = 0, 
+    TotalTimesJavelinThrown = 0, 
+    TotalTimesHammerThrown = 0, 
+    TotalTimesPoleVaulted = 0, 
+    TotalDistanceLongJumped = 0, 
+    TotalDistanceHighJumped = 0, 
+    TotalDistanceShotPut = 0, 
+    TotalDistanceDiscusThrown = 0, 
+    TotalDistanceJavelinThrown = 0, 
+    TotalDistanceHammerThrown = 0, 
+    TotalDistancePoleVaulted = 0, 
+    TotalDistanceTripeJumped = 0 
+  } = req.body;
+
   try {
     const [result] = await db.query(
-      'INSERT INTO AthleteProfile (UserID, PrimaryEvent, SecondaryEvent, PersonalBests, TrainingExperience, PeakTiming, SeasonStart, AvailableEquipment, Strengths, Weaknesses) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [UserID, PrimaryEvent, SecondaryEvent, JSON.stringify(PersonalBests), TrainingExperience, PeakTiming, SeasonStart, JSON.stringify(AvailableEquipment), JSON.stringify(Strengths), JSON.stringify(Weaknesses)]
+      `INSERT INTO AthleteProfile (
+        UserID, 
+        PrimaryEvent, 
+        SecondaryEvent, 
+        PersonalBests, 
+        TrainingExperience, 
+        PeakTiming, 
+        SeasonStart, 
+        AvailableEquipment, 
+        Strengths, 
+        Weaknesses, 
+        TotalTimesTripleJump, 
+        TotalDistanceRan, 
+        TotalTimeRan, 
+        TotalTimesLongJumped, 
+        TotalTimesHighJumped, 
+        TotalTimesShotPut, 
+        TotalTimesDiscusThrown, 
+        TotalTimesJavelinThrown, 
+        TotalTimesHammerThrown, 
+        TotalTimesPoleVaulted, 
+        TotalDistanceLongJumped, 
+        TotalDistanceHighJumped, 
+        TotalDistanceShotPut, 
+        TotalDistanceDiscusThrown, 
+        TotalDistanceJavelinThrown, 
+        TotalDistanceHammerThrown, 
+        TotalDistancePoleVaulted, 
+        TotalDistanceTripeJumped
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        UserID, 
+        PrimaryEvent, 
+        SecondaryEvent, 
+        JSON.stringify(PersonalBests), 
+        TrainingExperience, 
+        PeakTiming, 
+        SeasonStart, 
+        JSON.stringify(AvailableEquipment), 
+        JSON.stringify(Strengths), 
+        JSON.stringify(Weaknesses), 
+        TotalTimesTripleJump, 
+        TotalDistanceRan, 
+        TotalTimeRan, 
+        TotalTimesLongJumped, 
+        TotalTimesHighJumped, 
+        TotalTimesShotPut, 
+        TotalTimesDiscusThrown, 
+        TotalTimesJavelinThrown, 
+        TotalTimesHammerThrown, 
+        TotalTimesPoleVaulted, 
+        TotalDistanceLongJumped, 
+        TotalDistanceHighJumped, 
+        TotalDistanceShotPut, 
+        TotalDistanceDiscusThrown, 
+        TotalDistanceJavelinThrown, 
+        TotalDistanceHammerThrown, 
+        TotalDistancePoleVaulted, 
+        TotalDistanceTripeJumped
+      ]
     );
     res.status(201).json({ AthleteID: result.insertId });
   } catch (err) {
@@ -37,14 +125,92 @@ exports.createProfile = async (req, res) => {
 };
 
 // Update a profile
+// Update a profile
 exports.updateProfile = async (req, res) => {
   const { id } = req.params;
-  const { PrimaryEvent, SecondaryEvent, PersonalBests, TrainingExperience, PeakTiming, SeasonStart, AvailableEquipment, Strengths, Weaknesses } = req.body;
+  const {
+    PrimaryEvent, 
+    SecondaryEvent, 
+    PersonalBests, 
+    TrainingExperience, 
+    PeakTiming, 
+    SeasonStart, 
+    AvailableEquipment, 
+    Strengths, 
+    Weaknesses, 
+    TotalTimesTripleJump, 
+    TotalDistanceRan, 
+    TotalTimeRan, 
+    TotalTimesLongJumped, 
+    TotalTimesHighJumped, 
+    TotalTimesShotPut, 
+    TotalTimesDiscusThrown, 
+    TotalTimesJavelinThrown, 
+    TotalTimesHammerThrown, 
+    TotalTimesPoleVaulted, 
+    TotalDistanceLongJumped, 
+    TotalDistanceHighJumped, 
+    TotalDistanceShotPut, 
+    TotalDistanceDiscusThrown, 
+    TotalDistanceJavelinThrown, 
+    TotalDistanceHammerThrown, 
+    TotalDistancePoleVaulted, 
+    TotalDistanceTripleJumped // Corrected typo from TotalDistanceTripeJumped
+  } = req.body;
+
   try {
-    const [result] = await db.query(
-      'UPDATE AthleteProfile SET PrimaryEvent = ?, SecondaryEvent = ?, PersonalBests = ?, TrainingExperience = ?, PeakTiming = ?, SeasonStart = ?, AvailableEquipment = ?, Strengths = ?, Weaknesses = ? WHERE AthleteID = ?',
-      [PrimaryEvent, SecondaryEvent, JSON.stringify(PersonalBests), TrainingExperience, PeakTiming, SeasonStart, JSON.stringify(AvailableEquipment), JSON.stringify(Strengths), JSON.stringify(Weaknesses), id]
-    );
+    // Build the SQL SET part dynamically based on which fields are provided
+    let setClause = [];
+    let values = [];
+    
+    const fields = {
+      PrimaryEvent,
+      SecondaryEvent,
+      PersonalBests: JSON.stringify(PersonalBests),
+      TrainingExperience,
+      PeakTiming,
+      SeasonStart,
+      AvailableEquipment: JSON.stringify(AvailableEquipment),
+      Strengths: JSON.stringify(Strengths),
+      Weaknesses: JSON.stringify(Weaknesses),
+      TotalTimesTripleJump,
+      TotalDistanceRan,
+      TotalTimeRan,
+      TotalTimesLongJumped,
+      TotalTimesHighJumped,
+      TotalTimesShotPut,
+      TotalTimesDiscusThrown,
+      TotalTimesJavelinThrown,
+      TotalTimesHammerThrown,
+      TotalTimesPoleVaulted,
+      TotalDistanceLongJumped,
+      TotalDistanceHighJumped,
+      TotalDistanceShotPut,
+      TotalDistanceDiscusThrown,
+      TotalDistanceJavelinThrown,
+      TotalDistanceHammerThrown,
+      TotalDistancePoleVaulted,
+      TotalDistanceTripleJumped // Corrected typo from TotalDistanceTripeJumped
+    };
+
+    Object.keys(fields).forEach(key => {
+      if (fields[key] !== undefined && fields[key] !== null) {
+        setClause.push(`${key} = ?`);
+        values.push(fields[key]);
+      }
+    });
+
+    // Add the id at the end of the values array
+    values.push(id);
+
+    if (setClause.length === 0) {
+      return res.status(400).json({ error: 'No fields provided for update' });
+    }
+
+    // Construct SQL query
+    const sql = `UPDATE AthleteProfile SET ${setClause.join(', ')} WHERE AthleteID = ?`;
+    
+    const [result] = await db.query(sql, values);
     if (result.affectedRows === 0) return res.status(404).json({ error: 'Profile not found' });
     res.json({ message: 'Profile updated successfully' });
   } catch (err) {
