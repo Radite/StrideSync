@@ -270,7 +270,11 @@ fetch('http://192.168.100.71:3000/api/training-sessions/', {
   });
 
 };
-  
+  // Function to handle deletion
+const removeEntry = (index) => {
+  setTrainingLogs((prevLogs) => prevLogs.filter((_, i) => i !== index));
+};
+
 return (
   <View style={styles.container}>
     <Header title="Log Training Sessions" navigation={navigation} />
@@ -504,6 +508,14 @@ return (
               />
             </View>
           )}
+{/* Delete Button */}
+<TouchableOpacity
+  style={styles.deleteButton}
+  onPress={() => removeEntry(index)}
+>
+  <Text style={styles.deleteButtonText}>✕</Text>
+</TouchableOpacity>
+
         </View>
       ))}
 
@@ -578,6 +590,7 @@ const styles = StyleSheet.create({
   inputGroup: {
     flex: 1,
     marginHorizontal: 5,
+    marginTop:5,
   },
   input: {
     height: 40,
@@ -599,6 +612,23 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat-SemiBold',
+  },
+  deleteButton: {
+    width: 25, // Adjust size as needed
+    height: 25, // Adjust size as needed
+    borderRadius: 15, // This makes the button circular
+    backgroundColor: 'orange', // Fill color
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute', // Positioning can be adjusted based on where you want the button
+    top: 5, // Adjust as necessary
+    right: 5, // Adjust as necessary
+  },
+
+  deleteButtonText: {
+    color: 'white', // Text color
+    fontSize: 14, // Font size for "X"
+    fontWeight: 'bold', // Make the "X" bold
   },
 });
 
