@@ -208,9 +208,6 @@ const EventDetails = trainingLogs.map(log => ({
     SessionDate: formattedDate,
     SessionType: trainingType,
     EventDetails: EventDetails,
-    SpecialConditions: {
-      Surface: trainingLogs[0]?.spikes ? 'Spikes' : 'No Spikes',
-    },
     IntensityPercentage: 80, // Placeholder for intensity
     Notes: notes,
       // Total Distance for Each Event

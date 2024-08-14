@@ -35,12 +35,12 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
   }
 
   const {
-    SessionDate, SessionType, EventDetails, SpecialConditions, IntensityPercentage, Notes,
-    TotalDistanceRan, TotalTimeRan, NumberOfLongJumps, NumberOfHighJumps, NumberOfPoleVaults,
-    NumberOfShotPuts, NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows,
-    NumberOfTripleJumps, TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted,
+    SessionDate, SessionType, EventDetails, IntensityPercentage, Notes,
+    TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted,
     TotalDistanceShotPut, TotalDistanceDiscusThrown, TotalDistanceJavelinThrown, TotalDistanceHammerThrown,
-    TotalDistanceTripleJumped
+    TotalDistanceTripleJumped, TotalDistanceRan, TotalTimeRan, NumberOfLongJumps, NumberOfHighJumps,
+    NumberOfPoleVaults, NumberOfShotPuts, NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows,
+    NumberOfTripleJumps
   } = sessionDetails;
 
   return (
@@ -66,26 +66,10 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
               <View key={index} style={styles.eventItem}>
                 <Text style={styles.eventText}>Event: {event.Event}</Text>
                 <Text style={styles.eventText}>Reps: {event.Reps}</Text>
-                <Text style={styles.eventText}>Marks: {event.Marks.map(mark => mark.Mark).join(', ')}</Text>
-                <Text style={styles.eventText}>Time: {event.TotalTime} seconds</Text>
-                <Text style={styles.eventText}>Distance: {event.TotalDistance} meters</Text>
+                {event.Sets && <Text style={styles.eventText}>Sets: {event.Sets}</Text>}
+                {event.Height && <Text style={styles.eventText}>Height: {event.Height}</Text>}
               </View>
             ))}
-          </View>
-        </View>
-
-        {/* Special Conditions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Special Conditions</Text>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Surface</Text>
-            <Text style={styles.cardValue}>{SpecialConditions.Surface}</Text>
-            {SpecialConditions.Weather && (
-              <>
-                <Text style={styles.cardTitle}>Weather</Text>
-                <Text style={styles.cardValue}>{SpecialConditions.Weather}</Text>
-              </>
-            )}
           </View>
         </View>
 
@@ -174,6 +158,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
+    width: width - 40, // Adjust width based on screen dimensions
   },
   cardTitle: {
     fontSize: 16,
