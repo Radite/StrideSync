@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import Footer from '../Footer'; 
 import Header from '../Header'; 
 import { format, startOfWeek, endOfWeek, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios'; // Make sure axios is installed
+import { useFocusEffect } from '@react-navigation/native';
 
 const TrainingLogScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,17 +16,18 @@ const TrainingLogScreen = ({ navigation }) => {
   const [endDate, setEndDate] = useState('');
   const [historicalData, setHistoricalData] = useState([]);
 
-  useEffect(() => {
-    // Fetch data from API
-    axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1')
-      .then(response => {
-        setHistoricalData(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      // Fetch data from API
+      axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1')
+        .then(response => {
+          setHistoricalData(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    }, [])
+  );
   useEffect(() => {
     filterData();
   }, [searchQuery, dateFilter, startDate, endDate, historicalData]);
