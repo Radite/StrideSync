@@ -109,24 +109,64 @@ const LogTraining = ({ navigation }) => {
     const notes = "Training session went well."; // Example notes
     
       // Process training logs to calculate event details
-  const EventDetails = trainingLogs.map(log => ({
-    EventType: log.eventType,
-    Event: convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
-    Reps: log.reps,
-    Marks: log.marks.map(mark => ({ Mark: mark })),
-    TotalDistance: log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit),
-    TotalTime: log.marks.reduce((sum, mark) => sum + parseFloat(mark) || 0, 0), // Sum of marks as numbers
-  }));
+      const EventDetails = trainingLogs.map(log => ({
+        EventType: log.eventType,
+        Event: log.eventType === 'running' 
+          ? convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+          : log.subEvent,
+        Reps: log.reps,
+        Marks: log.marks.map(mark => ({ Mark: mark })),
+        TotalDistance: log.eventType === 'running'
+          ? log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+          : log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0), // Sum of marks for field events
+        ...(log.eventType === 'running' 
+          ? { TotalTime: log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0) }
+          : { TotalReps: log.reps }) // Add TotalReps only if not running
+      }));
+      
+      console.log(trainingLogs);
 
-  // Calculate TotalDistanceRan and TotalTimeRan
+
+  // General function to calculate total distance for a given event
+  const calculateTotalDistance = (events, eventType) => 
+    events
+      .filter(detail => detail.Event === eventType)
+      .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
+
+  // Calculate TotalDistanceRan
   const TotalDistanceRan = EventDetails
-    .filter(detail => detail.EventType === 'running')  // Filter for running events
-    .reduce((total, detail) => total + detail.TotalDistance, 0);
+    .filter(detail => detail.EventType === 'running')
+    .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
 
-  const TotalTimeRan = EventDetails
+    const TotalTimeRan = EventDetails
     .filter(detail => detail.EventType === 'running')  // Filter for running events
     .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for running events
 
+  // Calculate TotalDistanceLongJumped
+  const TotalDistanceLongJumped = calculateTotalDistance(EventDetails, 'long_jump');
+
+  // Calculate TotalDistanceHighJumped
+  const TotalDistanceHighJumped = calculateTotalDistance(EventDetails, 'high_jump');
+
+  // Calculate TotalDistancePoleVaulted
+  const TotalDistancePoleVaulted = calculateTotalDistance(EventDetails, 'pole_vault');
+
+  // Calculate TotalDistanceShotPut
+  const TotalDistanceShotPut = calculateTotalDistance(EventDetails, 'shot_put');
+
+  // Calculate TotalDistanceDiscusThrown
+  const TotalDistanceDiscusThrown = calculateTotalDistance(EventDetails, 'discus');
+
+  // Calculate TotalDistanceJavelinThrown
+  const TotalDistanceJavelinThrown = calculateTotalDistance(EventDetails, 'javelin');
+
+  // Calculate TotalDistanceHammerThrown
+  const TotalDistanceHammerThrown = calculateTotalDistance(EventDetails, 'hammer');
+
+  // Calculate TotalDistanceTripleJumped
+  const TotalDistanceTripleJumped = calculateTotalDistance(EventDetails, 'triple_jump');
+
+    
   // Payload for training session details
   const trainingPayload = {
     AthleteID: 1,
@@ -138,40 +178,50 @@ const LogTraining = ({ navigation }) => {
     },
     IntensityPercentage: 0, // Placeholder for intensity
     Notes: notes,
-    TotalDistanceHighJumped: trainingLogs
-      .filter(log => log.subEvent === 'high_jump')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceLongJumped: trainingLogs
-      .filter(log => log.subEvent === 'long_jump')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistancePoleVaulted: trainingLogs
-      .filter(log => log.subEvent === 'pole_vault')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceShotPut: trainingLogs
-      .filter(log => log.subEvent === 'shot_put')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceDiscusThrown: trainingLogs
-      .filter(log => log.subEvent === 'discus')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceJavelinThrown: trainingLogs
-      .filter(log => log.subEvent === 'javelin')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceHammerThrown: trainingLogs
-      .filter(log => log.subEvent === 'hammer')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
-    TotalDistanceTripleJumped: trainingLogs
-      .filter(log => log.subEvent === 'triple_jump')
-      .reduce((total, log) => total + convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit), 0),
+      // Total Distance for Each Event
+      TotalDistanceHighJumped: TotalDistanceHighJumped,
+      TotalDistanceLongJumped: TotalDistanceLongJumped,
+      TotalDistancePoleVaulted: TotalDistancePoleVaulted,
+      TotalDistanceShotPut: TotalDistanceShotPut,
+      TotalDistanceDiscusThrown: TotalDistanceDiscusThrown,
+      TotalDistanceJavelinThrown: TotalDistanceJavelinThrown,
+      TotalDistanceHammerThrown: TotalDistanceHammerThrown,
+      TotalDistanceTripleJumped: TotalDistanceTripleJumped,
+      
+  NumberOfLongJumps: trainingLogs
+    .filter(log => log.subEvent === 'long_jump')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfHighJumps: trainingLogs
+    .filter(log => log.subEvent === 'high_jump')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfPoleVaults: trainingLogs
+    .filter(log => log.subEvent === 'pole_vault')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfShotPuts: trainingLogs
+    .filter(log => log.subEvent === 'shot_put')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfDiscusThrows: trainingLogs
+    .filter(log => log.subEvent === 'discus')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfJavelinThrows: trainingLogs
+    .filter(log => log.subEvent === 'javelin')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfHammerThrows: trainingLogs
+    .filter(log => log.subEvent === 'hammer')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
+  NumberOfTripleJumps: trainingLogs
+    .filter(log => log.subEvent === 'triple_jump')
+    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
+
     TotalDistanceRan: TotalDistanceRan,
     TotalTimeRan: TotalTimeRan,
-    NumberOfLongJumps: trainingLogs.filter(log => log.subEvent === 'long_jump').length,
-    NumberOfHighJumps: trainingLogs.filter(log => log.subEvent === 'high_jump').length,
-    NumberOfPoleVaults: trainingLogs.filter(log => log.subEvent === 'pole_vault').length,
-    NumberOfShotPuts: trainingLogs.filter(log => log.subEvent === 'shot_put').length,
-    NumberOfDiscusThrows: trainingLogs.filter(log => log.subEvent === 'discus').length,
-    NumberOfJavelinThrows: trainingLogs.filter(log => log.subEvent === 'javelin').length,
-    NumberOfHammerThrows: trainingLogs.filter(log => log.subEvent === 'hammer').length,
-    NumberOfTripleJumps: trainingLogs.filter(log => log.subEvent === 'triple_jump').length,
   };
 
   // Payload for profile update with only TotalDistanceRan and TotalTimeRan
@@ -225,261 +275,267 @@ const LogTraining = ({ navigation }) => {
   });
 };
   
-  return (
-    <View style={styles.container}>
-      <Header title="Log Training Sessions" navigation={navigation} />
+return (
+  <View style={styles.container}>
+    <Header title="Log Training Sessions" navigation={navigation} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Date Selector */}
-        <View style={styles.datePickerContainer}>
-          <Text style={styles.label}>Training Date:</Text>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-            <Text style={styles.dateButtonText}>
-              {format(date, 'eeee, MMMM do, yyyy')}
-            </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-        </View>
-
-        {/* Training Type Selector */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Training Type</Text>
-          <RNPickerSelect
-            value={trainingType}
-            onValueChange={(itemValue) => setTrainingType(itemValue)}
-            items={[
-              { label: 'Select Training Type', value: '' },
-              { label: 'Speed', value: 'speed' },
-              { label: 'Interval', value: 'interval' },
-              { label: 'Tempo', value: 'tempo' },
-              { label: 'Hill', value: 'hill' },
-              { label: 'Long Run', value: 'long_run' },
-              { label: 'Speed Endurance', value: 'speed_endurance' },
-              { label: 'Block Work', value: 'block_work' },
-              { label: 'Endurance', value: 'endurance' },
-              { label: 'Recovery', value: 'recovery' },
-              { label: 'Power', value: 'power' },
-              { label: 'Other', value: 'other'},
-            ]}
-            style={pickerSelectStyles}
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      {/* Date Selector */}
+      <View style={styles.datePickerContainer}>
+        <Text style={styles.label}>Training Date:</Text>
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {format(date, 'eeee, MMMM do, yyyy')}
+          </Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
           />
-        </View>
+        )}
+      </View>
 
-        {trainingLogs.map((log, index) => (
-          <View key={index} style={styles.formGroup}>
-            {/* Event Type Selector */}
+      {/* Training Type Selector */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Training Type</Text>
+        <RNPickerSelect
+          value={trainingType}
+          onValueChange={(itemValue) => setTrainingType(itemValue)}
+          items={[
+            { label: 'Select Training Type', value: '' },
+            { label: 'Speed', value: 'speed' },
+            { label: 'Interval', value: 'interval' },
+            { label: 'Tempo', value: 'tempo' },
+            { label: 'Hill', value: 'hill' },
+            { label: 'Long Run', value: 'long_run' },
+            { label: 'Speed Endurance', value: 'speed_endurance' },
+            { label: 'Block Work', value: 'block_work' },
+            { label: 'Endurance', value: 'endurance' },
+            { label: 'Recovery', value: 'recovery' },
+            { label: 'Power', value: 'power' },
+            { label: 'Other', value: 'other' },
+          ]}
+          style={pickerSelectStyles}
+        />
+      </View>
+
+      {trainingLogs.map((log, index) => (
+        <View key={index} style={styles.formGroup}>
+          {/* Event Type Selector */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Event Type</Text>
+            <RNPickerSelect
+              value={log.eventType}
+              onValueChange={(itemValue) => handleInputChange(index, 'eventType', itemValue)}
+              items={[
+                { label: 'Select Event Type', value: '' },
+                { label: 'Running', value: 'running' },
+                { label: 'Field Event', value: 'field' },
+              ]}
+              style={pickerSelectStyles}
+            />
+          </View>
+
+          {/* Conditional Sub-Event Selector for Field Events */}
+          {log.eventType === 'field' && (
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Field Event</Text>
+                <RNPickerSelect
+                  value={log.subEvent}
+                  onValueChange={(itemValue) => handleInputChange(index, 'subEvent', itemValue)}
+                  items={[
+                    { label: 'Select Field Event', value: '' },
+                    { label: 'Long Jump', value: 'long_jump' },
+                    { label: 'High Jump', value: 'high_jump' },
+                    { label: 'Pole Vault', value: 'pole_vault' },
+                    { label: 'Shot Put', value: 'shot_put' },
+                    { label: 'Discus', value: 'discus' },
+                    { label: 'Javelin', value: 'javelin' },
+                    { label: 'Triple Jump', value: 'triple_jump' },
+                  ]}
+                  style={pickerSelectStyles}
+                />
+              </View>
+
+              {/* Reps for Field Events */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>No. of Reps</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., 5"
+                  keyboardType="numeric"
+                  value={log.reps}
+                  onChangeText={(value) => handleInputChange(index, 'reps', value)}
+                />
+              </View>
+
+              {/* Marks for Each Rep */}
+              {Array.from({ length: log.reps }).map((_, repIndex) => (
+                <View key={repIndex} style={styles.inputGroup}>
+                  <Text style={styles.label}>Mark {repIndex + 1}</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={`Mark ${repIndex + 1}`}
+                    value={log.marks[repIndex]}
+                    onChangeText={(value) => handleMarkChange(index, repIndex, value)}
+                  />
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* Conditional Distance Input for Running */}
+          {log.eventType === 'running' && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Event Type</Text>
+              <Text style={styles.label}>Distance</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g., 100"
+                keyboardType="numeric"
+                value={log.distance}
+                onChangeText={(value) => handleInputChange(index, 'distance', value)}
+              />
               <RNPickerSelect
-                value={log.eventType}
-                onValueChange={(itemValue) => handleInputChange(index, 'eventType', itemValue)}
+                value={log.distanceUnit}
+                onValueChange={(itemValue) => handleInputChange(index, 'distanceUnit', itemValue)}
                 items={[
-                  { label: 'Select Event Type', value: '' },
-                  { label: 'Running', value: 'running' },
-                  { label: 'Field Event', value: 'field' },
+                  { label: 'Meters', value: 'meters' },
+                  { label: 'Miles', value: 'miles' },
                 ]}
                 style={pickerSelectStyles}
               />
             </View>
+          )}
 
-            {/* Conditional Sub-Event Selector for Field Events */}
-            {log.eventType === 'field' && (
-              <>
+          {/* Running-specific options */}
+          {log.eventType === 'running' && (
+            <>
+              <View style={styles.row}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Field Event</Text>
+                  <Text style={styles.label}>Sled</Text>
                   <RNPickerSelect
-                    value={log.subEvent}
-                    onValueChange={(itemValue) => handleInputChange(index, 'subEvent', itemValue)}
+                    value={log.sled ? 'yes' : 'no'}
+                    onValueChange={(itemValue) => handleInputChange(index, 'sled', itemValue === 'yes')}
                     items={[
-                      { label: 'Select Field Event', value: '' },
-                      { label: 'Long Jump', value: 'long_jump' },
-                      { label: 'High Jump', value: 'high_jump' },
-                      { label: 'Pole Vault', value: 'pole_vault' },
-                      { label: 'Shot Put', value: 'shot_put' },
-                      { label: 'Discus', value: 'discus' },
-                      { label: 'Javelin', value: 'javelin' },
-                      { label: 'Triple Jump', value: 'triple_jump' },
+                      { label: 'No', value: 'no' },
+                      { label: 'Yes', value: 'yes' },
                     ]}
                     style={pickerSelectStyles}
                   />
                 </View>
-
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Distance</Text>
+                  <Text style={styles.label}>Hills</Text>
+                  <RNPickerSelect
+                    value={log.hills ? 'yes' : 'no'}
+                    onValueChange={(itemValue) => handleInputChange(index, 'hills', itemValue === 'yes')}
+                    items={[
+                      { label: 'No', value: 'no' },
+                      { label: 'Yes', value: 'yes' },
+                    ]}
+                    style={pickerSelectStyles}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Grass</Text>
+                  <RNPickerSelect
+                    value={log.grass ? 'yes' : 'no'}
+                    onValueChange={(itemValue) => handleInputChange(index, 'grass', itemValue === 'yes')}
+                    items={[
+                      { label: 'No', value: 'no' },
+                      { label: 'Yes', value: 'yes' },
+                    ]}
+                    style={pickerSelectStyles}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Spikes</Text>
+                  <RNPickerSelect
+                    value={log.spikes ? 'yes' : 'no'}
+                    onValueChange={(itemValue) => handleInputChange(index, 'spikes', itemValue === 'yes')}
+                    items={[
+                      { label: 'No', value: 'no' },
+                      { label: 'Yes', value: 'yes' },
+                    ]}
+                    style={pickerSelectStyles}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>No. of Reps</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder="e.g., 10"
+                    placeholder="e.g., 5"
                     keyboardType="numeric"
-                    value={log.distance}
-                    onChangeText={(value) => handleInputChange(index, 'distance', value)}
-                  />
-                  <RNPickerSelect
-                    value={log.distanceUnit}
-                    onValueChange={(itemValue) => handleInputChange(index, 'distanceUnit', itemValue)}
-                    items={[
-                      { label: 'Meters', value: 'meters' },
-                      { label: 'Feet', value: 'feet' },
-                    ]}
-                    style={pickerSelectStyles}
+                    value={log.reps}
+                    onChangeText={(value) => handleInputChange(index, 'reps', value)}
                   />
                 </View>
-              </>
-            )}
-
-            {/* Conditional Distance Input for Running */}
-            {log.eventType === 'running' && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Distance</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 100"
-                  keyboardType="numeric"
-                  value={log.distance}
-                  onChangeText={(value) => handleInputChange(index, 'distance', value)}
-                />
-                <RNPickerSelect
-                  value={log.distanceUnit}
-                  onValueChange={(itemValue) => handleInputChange(index, 'distanceUnit', itemValue)}
-                  items={[
-                    { label: 'Meters', value: 'meters' },
-                    { label: 'Miles', value: 'miles' },
-                  ]}
-                  style={pickerSelectStyles}
-                />
               </View>
-            )}
 
-            {/* Running-specific options */}
-            {log.eventType === 'running' && (
-              <>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Sled</Text>
-                    <RNPickerSelect
-                      value={log.sled ? 'yes' : 'no'}
-                      onValueChange={(itemValue) => handleInputChange(index, 'sled', itemValue === 'yes')}
-                      items={[
-                        { label: 'No', value: 'no' },
-                        { label: 'Yes', value: 'yes' },
-                      ]}
-                      style={pickerSelectStyles}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Hills</Text>
-                    <RNPickerSelect
-                      value={log.hills ? 'yes' : 'no'}
-                      onValueChange={(itemValue) => handleInputChange(index, 'hills', itemValue === 'yes')}
-                      items={[
-                        { label: 'No', value: 'no' },
-                        { label: 'Yes', value: 'yes' },
-                      ]}
-                      style={pickerSelectStyles}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Grass</Text>
-                    <RNPickerSelect
-                      value={log.grass ? 'yes' : 'no'}
-                      onValueChange={(itemValue) => handleInputChange(index, 'grass', itemValue === 'yes')}
-                      items={[
-                        { label: 'No', value: 'no' },
-                        { label: 'Yes', value: 'yes' },
-                      ]}
-                      style={pickerSelectStyles}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Spikes</Text>
-                    <RNPickerSelect
-                      value={log.spikes ? 'yes' : 'no'}
-                      onValueChange={(itemValue) => handleInputChange(index, 'spikes', itemValue === 'yes')}
-                      items={[
-                        { label: 'No', value: 'no' },
-                        { label: 'Yes', value: 'yes' },
-                      ]}
-                      style={pickerSelectStyles}
-                    />
-                  </View>
+              {log.marks.map((mark, markIndex) => (
+                <View key={markIndex} style={styles.inputGroup}>
+                  <Text style={styles.label}>Mark {markIndex + 1}</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={`Mark ${markIndex + 1}`}
+                    value={mark}
+                    onChangeText={(value) => handleMarkChange(index, markIndex, value)}
+                  />
                 </View>
+              ))}
+            </>
+          )}
 
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>No. of Reps</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="e.g., 5"
-                      keyboardType="numeric"
-                      value={log.reps}
-                      onChangeText={(value) => handleInputChange(index, 'reps', value)}
-                    />
-                  </View>
-                </View>
-
-                {log.marks.map((mark, markIndex) => (
-                  <View key={markIndex} style={styles.inputGroup}>
-                    <Text style={styles.label}>Mark {markIndex + 1}</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder={`Mark ${markIndex + 1}`}
-                      value={mark}
-                      onChangeText={(value) => handleMarkChange(index, markIndex, value)}
-                    />
-                  </View>
-                ))}
-              </>
-            )}
-
-            {/* Field Events Spikes Option */}
-            {log.eventType === 'field' && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Spikes</Text>
-                <RNPickerSelect
-                  value={log.spikes ? 'yes' : 'no'}
-                  onValueChange={(itemValue) => handleInputChange(index, 'spikes', itemValue === 'yes')}
-                  items={[
-                    { label: 'No', value: 'no' },
-                    { label: 'Yes', value: 'yes' },
-                  ]}
-                  style={pickerSelectStyles}
-                />
-              </View>
-            )}
-          </View>
-        ))}
-
-        {/* Notes Section (One per session) */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Notes</Text>
-          <TextInput
-            style={[styles.input, { height: 80, textAlignVertical: 'top' }]} // Make input taller for notes
-            placeholder="Add any additional notes here..."
-            multiline
-            numberOfLines={4}
-            value={notes}
-            onChangeText={(value) => setNotes(value)}
-          />
+          {/* Field Events Spikes Option */}
+          {log.eventType === 'field' && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Spikes</Text>
+              <RNPickerSelect
+                value={log.spikes ? 'yes' : 'no'}
+                onValueChange={(itemValue) => handleInputChange(index, 'spikes', itemValue === 'yes')}
+                items={[
+                  { label: 'No', value: 'no' },
+                  { label: 'Yes', value: 'yes' },
+                ]}
+                style={pickerSelectStyles}
+              />
+            </View>
+          )}
         </View>
+      ))}
 
-        <TouchableOpacity style={styles.addButton} onPress={addAnotherEntry}>
-          <Text style={styles.addButtonText}>Add Another Entry</Text>
-        </TouchableOpacity>
+      {/* Notes Section (One per session) */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Notes</Text>
+        <TextInput
+          style={[styles.input, { height: 80, textAlignVertical: 'top' }]} // Make input taller for notes
+          placeholder="Add any additional notes here..."
+          multiline
+          numberOfLines={4}
+          value={notes}
+          onChangeText={(value) => setNotes(value)}
+        />
+      </View>
 
-        <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
-          <Text style={styles.addButtonText}>Submit</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      <TouchableOpacity style={styles.addButton} onPress={addAnotherEntry}>
+        <Text style={styles.addButtonText}>Add Another Entry</Text>
+      </TouchableOpacity>
 
-      <Footer navigation={navigation} />
-    </View>
-  );
+      <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
+        <Text style={styles.addButtonText}>Submit</Text>
+      </TouchableOpacity>
+    </ScrollView>
+
+    <Footer navigation={navigation} />
+  </View>
+);
+
 };
 
 const styles = StyleSheet.create({
