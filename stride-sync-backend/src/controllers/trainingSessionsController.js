@@ -28,7 +28,6 @@ exports.createSession = async (req, res) => {
     SessionDate,
     SessionType,
     EventDetails,
-    SpecialConditions,
     IntensityPercentage,
     Notes,
     TotalDistanceHighJumped,
@@ -52,55 +51,63 @@ exports.createSession = async (req, res) => {
   } = req.body;
 
   const query = `
-    INSERT INTO TrainingSessions 
-    (AthleteID, SessionDate, SessionType, EventDetails, SpecialConditions, IntensityPercentage, Notes, 
-    TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted, TotalDistanceShotPut, 
-    TotalDistanceDiscusThrown, TotalDistanceJavelinThrown, TotalDistanceHammerThrown, TotalDistanceTripleJumped, 
-    TotalDistanceRan, TotalTimeRan, NumberOfLongJumps, NumberOfHighJumps, NumberOfPoleVaults, NumberOfShotPuts, 
-    NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows, NumberOfTripleJumps) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  INSERT INTO TrainingSessions 
+  (AthleteID, SessionDate, SessionType, EventDetails, IntensityPercentage, Notes, 
+  TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted, TotalDistanceShotPut, 
+  TotalDistanceDiscusThrown, TotalDistanceJavelinThrown, TotalDistanceHammerThrown, TotalDistanceTripleJumped, 
+  TotalDistanceRan, TotalTimeRan, NumberOfLongJumps, NumberOfHighJumps, NumberOfPoleVaults, NumberOfShotPuts, 
+  NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows, NumberOfTripleJumps) 
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
 
-  const values = [
-    AthleteID,
-    SessionDate,
-    SessionType,
-    JSON.stringify(EventDetails),
-    JSON.stringify(SpecialConditions),
-    IntensityPercentage,
-    Notes,
-    TotalDistanceHighJumped,
-    TotalDistanceLongJumped,
-    TotalDistancePoleVaulted,
-    TotalDistanceShotPut,
-    TotalDistanceDiscusThrown,
-    TotalDistanceJavelinThrown,
-    TotalDistanceHammerThrown,
-    TotalDistanceTripleJumped,
-    TotalDistanceRan,
-    TotalTimeRan,
-    NumberOfLongJumps,
-    NumberOfHighJumps,
-    NumberOfPoleVaults,
-    NumberOfShotPuts,
-    NumberOfDiscusThrows,
-    NumberOfJavelinThrows,
-    NumberOfHammerThrows,
-    NumberOfTripleJumps
-  ];
+const values = [
+  AthleteID,
+  SessionDate,
+  SessionType,
+  JSON.stringify(EventDetails),
+  IntensityPercentage || 0,
+  Notes || '',
+  TotalDistanceHighJumped || 0,
+  TotalDistanceLongJumped || 0,
+  TotalDistancePoleVaulted || 0,
+  TotalDistanceShotPut || 0,
+  TotalDistanceDiscusThrown || 0,
+  TotalDistanceJavelinThrown || 0,
+  TotalDistanceHammerThrown || 0,
+  TotalDistanceTripleJumped || 0,
+  TotalDistanceRan || 0,
+  TotalTimeRan || 0,
+  NumberOfLongJumps || 0,
+  NumberOfHighJumps || 0,
+  NumberOfPoleVaults || 0,
+  NumberOfShotPuts || 0,
+  NumberOfDiscusThrows || 0,
+  NumberOfJavelinThrows || 0,
+  NumberOfHammerThrows || 0,
+  NumberOfTripleJumps || 0
+];
 
-  // Debugging output
-  console.log('SQL Query:', query);
-  console.log('Values:', values);
-  console.log('Number of Columns:', query.match(/\?/g).length);
-  console.log('Number of Values:', values.length);
+// Log number of placeholders and values
+console.log('Number of Placeholders:', query.match(/\?/g)?.length || 0);
+console.log('Number of Values:', values.length);
+
 
   try {
     const [result] = await db.query(query, values);
     res.status(201).json({ SessionID: result.insertId });
   } catch (err) {
-    console.error('SQL Error:', err.message);
-    res.status(500).json({ error: err.message });
+    // Enhanced error logging
+    console.error('SQL Error Message:', err.message);
+    console.error('SQL Error Code:', err.code);
+    console.error('SQL Query:', query);
+    console.error('Values:', values);
+    res.status(500).json({ 
+      error: 'An error occurred while creating the session.',
+      message: err.message,
+      code: err.code,
+      query: query,
+      values: values
+    });
   }
 };
 
@@ -112,7 +119,6 @@ exports.updateSession = async (req, res) => {
     SessionDate,
     SessionType,
     EventDetails,
-    SpecialConditions,
     IntensityPercentage,
     Notes,
     TotalDistanceHighJumped,
@@ -137,14 +143,12 @@ exports.updateSession = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      'UPDATE TrainingSessions SET AthleteID = ?, SessionDate = ?, SessionType = ?, EventDetails = ?, SpecialConditions = ?, CumulativeDistance = ?, IntensityPercentage = ?, Notes = ?, TotalDistanceHighJumped = ?, TotalDistanceLongJumped = ?, TotalDistancePoleVaulted = ?, TotalDistanceShotPut = ?, TotalDistanceDiscusThrown = ?, TotalDistanceJavelinThrown = ?, TotalDistanceHammerThrown = ?, TotalDistanceTripleJumped = ?, TotalDistanceRan = ?, TotalTimeRan = ?, NumberOfLongJumps = ?, NumberOfHighJumps = ?, NumberOfPoleVaults = ?, NumberOfShotPuts = ?, NumberOfDiscusThrows = ?, NumberOfJavelinThrows = ?, NumberOfHammerThrows = ?, NumberOfTripleJumps = ? WHERE SessionID = ?',
+      'UPDATE TrainingSessions SET AthleteID = ?, SessionDate = ?, SessionType = ?, EventDetails = ?, IntensityPercentage = ?, Notes = ?, TotalDistanceHighJumped = ?, TotalDistanceLongJumped = ?, TotalDistancePoleVaulted = ?, TotalDistanceShotPut = ?, TotalDistanceDiscusThrown = ?, TotalDistanceJavelinThrown = ?, TotalDistanceHammerThrown = ?, TotalDistanceTripleJumped = ?, TotalDistanceRan = ?, TotalTimeRan = ?, NumberOfLongJumps = ?, NumberOfHighJumps = ?, NumberOfPoleVaults = ?, NumberOfShotPuts = ?, NumberOfDiscusThrows = ?, NumberOfJavelinThrows = ?, NumberOfHammerThrows = ?, NumberOfTripleJumps = ? WHERE SessionID = ?',
       [
         AthleteID,
         SessionDate,
         SessionType,
         JSON.stringify(EventDetails),
-        JSON.stringify(SpecialConditions),
-        CumulativeDistance,
         IntensityPercentage,
         Notes,
         TotalDistanceHighJumped || 0,
