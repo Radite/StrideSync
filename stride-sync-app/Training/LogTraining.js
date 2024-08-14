@@ -17,7 +17,6 @@ const LogTraining = ({ navigation }) => {
       distance: '', 
       distanceUnit: 'meters', 
       sled: false, 
-      hills: false, 
       grass: false, 
       spikes: false,
     },
@@ -107,7 +106,6 @@ const LogTraining = ({ navigation }) => {
       distance: '', 
       distanceUnit: 'meters', 
       sled: false, 
-      hills: false, 
       grass: false, 
       spikes: false,
     };
@@ -127,22 +125,25 @@ const LogTraining = ({ navigation }) => {
     const trainingType = "Interval"; // Example training type
     const notes = "Training session went well."; // Example notes
     
-      // Process training logs to calculate event details
-      const EventDetails = trainingLogs.map(log => ({
-        EventType: log.eventType,
-        Event: log.eventType === 'running' 
-          ? convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
-          : log.subEvent,
-        Reps: log.reps,
-        Marks: log.marks.map(mark => ({ Mark: mark })),
-        TotalDistance: log.eventType === 'running'
-          ? log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
-          : log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0), // Sum of marks for field events
-        ...(log.eventType === 'running' 
-          ? { TotalTime: log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0) }
-          : { TotalReps: log.reps }) // Add TotalReps only if not running
-      }));
-      
+// Process training logs to calculate event details
+const EventDetails = trainingLogs.map(log => ({
+  EventType: log.eventType,
+  Event: log.eventType === 'running' 
+    ? convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+    : log.subEvent,
+  Reps: log.reps,
+  Marks: log.marks.map(mark => ({ Mark: mark })),
+  TotalDistance: log.eventType === 'running'
+    ? log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+    : log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0), // Sum of marks for field events
+  ...(log.eventType === 'running' 
+    ? { TotalTime: log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0) }
+    : { TotalReps: log.reps }), // Add TotalReps only if not running
+    sled: log.sled || false,  // Default to false if not set
+    grass: log.grass || false,  // Default to false if not set
+    spikes: log.spikes || false,  // Default to false if not set
+  }));
+
       console.log(trainingLogs);
 
 
@@ -476,18 +477,7 @@ return (
                     style={pickerSelectStyles}
                   />
                 </View>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Hills</Text>
-                  <RNPickerSelect
-                    value={log.hills ? 'yes' : 'no'}
-                    onValueChange={(itemValue) => handleInputChange(index, 'hills', itemValue === 'yes')}
-                    items={[
-                      { label: 'No', value: 'no' },
-                      { label: 'Yes', value: 'yes' },
-                    ]}
-                    style={pickerSelectStyles}
-                  />
-                </View>
+
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>Grass</Text>
                   <RNPickerSelect
