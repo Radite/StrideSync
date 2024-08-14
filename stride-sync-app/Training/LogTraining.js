@@ -33,7 +33,50 @@ const LogTraining = ({ navigation }) => {
     return distance;
   };
 
-
+  const validateFields = () => {
+    // Check if training type is selected
+    if (!trainingType) {
+      alert('Please select a Training Type.');
+      return false;
+    }
+  
+    // Check if each event has a valid type and reps/distance if required
+    for (const log of trainingLogs) {
+      if (!log.eventType) {
+        alert('Please select an Event Type for each entry.');
+        return false;
+      }
+  
+      if (log.eventType === 'running') {
+        if (!log.distance) {
+          alert('Distance cannot be empty for running events.');
+          return false;
+        }
+      }
+  
+      if ((log.eventType === 'field' || log.eventType === 'running') && !log.reps) {
+        alert('Number of Reps cannot be empty for field and running events.');
+        return false;
+      }
+  
+      // Check if marks are filled for each rep
+      if (log.reps && log.marks.length < log.reps) {
+        alert('Please fill in all marks.');
+        return false;
+      }
+      
+      // Validate each mark input
+      for (const mark of log.marks) {
+        if (!mark) {
+          alert('Marks cannot be empty.');
+          return false;
+        }
+      }
+    }
+  
+    return true;
+  };
+  
   const handleInputChange = (index, field, value) => {
     const newLogs = [...trainingLogs];
     newLogs[index][field] = value;
@@ -47,11 +90,14 @@ const LogTraining = ({ navigation }) => {
   };
 
   const handleMarkChange = (logIndex, markIndex, value) => {
-    const newLogs = [...trainingLogs];
-    newLogs[logIndex].marks[markIndex] = value;
-    setTrainingLogs(newLogs);
+    const updatedLogs = [...trainingLogs];
+    if (!updatedLogs[logIndex].marks) {
+      updatedLogs[logIndex].marks = [];
+    }
+    updatedLogs[logIndex].marks[markIndex] = value;
+    setTrainingLogs(updatedLogs);
   };
-
+  
   const addAnotherEntry = () => {
     const newEntry = { 
       eventType: '', 
@@ -75,6 +121,8 @@ const LogTraining = ({ navigation }) => {
   };
 
   const handleSubmit = () => {
+    if (validateFields()) {
+
     const formattedDate = "2024-08-11"; // Example formatted date
     const trainingType = "Interval"; // Example training type
     const notes = "Training session went well."; // Example notes
@@ -269,7 +317,7 @@ fetch('http://192.168.100.71:3000/api/training-sessions/', {
     // Handle error (e.g., show an error message)
   });
 
-};
+}};
   // Function to handle deletion
 const removeEntry = (index) => {
   setTrainingLogs((prevLogs) => prevLogs.filter((_, i) => i !== index));
@@ -337,7 +385,6 @@ return (
               placeholder={{ label: 'Select Event Type', value: '' }}
               style={pickerSelectStyles}
             />
-
           </View>
 
           {/* Conditional Sub-Event Selector for Field Events */}
@@ -375,17 +422,18 @@ return (
               </View>
 
               {/* Marks for Each Rep */}
-              {Array.from({ length: log.reps }).map((_, repIndex) => (
-                <View key={repIndex} style={styles.inputGroup}>
-                  <Text style={styles.label}>Mark {repIndex + 1}</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={`Mark ${repIndex + 1}`}
-                    value={log.marks[repIndex]}
-                    onChangeText={(value) => handleMarkChange(index, repIndex, value)}
-                  />
-                </View>
-              ))}
+              {log.reps && Array.from({ length: log.reps }).map((_, repIndex) => (
+  <View key={repIndex} style={styles.inputGroup}>
+    <Text style={styles.label}>Mark {repIndex + 1}</Text>
+    <TextInput
+      style={styles.input}
+      placeholder={`Mark ${repIndex + 1}`}
+      value={log.marks[repIndex] || ''}
+      onChangeText={(value) => handleMarkChange(index, repIndex, value)}
+    />
+  </View>
+))}
+
             </>
           )}
 
@@ -508,14 +556,14 @@ return (
               />
             </View>
           )}
-{/* Delete Button */}
-<TouchableOpacity
-  style={styles.deleteButton}
-  onPress={() => removeEntry(index)}
->
-  <Text style={styles.deleteButtonText}>✕</Text>
-</TouchableOpacity>
 
+          {/* Delete Button */}
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => removeEntry(index)}
+          >
+            <Text style={styles.deleteButtonText}>✕</Text>
+          </TouchableOpacity>
         </View>
       ))}
 
@@ -544,6 +592,7 @@ return (
     <Footer navigation={navigation} />
   </View>
 );
+
 
 };
 
