@@ -584,7 +584,7 @@ return (
         <Text style={styles.addButtonText}>Add Another Entry</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.addButtonText}>Submit</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -650,11 +650,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     backgroundColor: '#2A2A2A',
   },
+  submitButton: {
+    backgroundColor: '#FFB74D',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 70,
+    alignItems: 'center',
+  },
   addButton: {
     backgroundColor: '#FFB74D',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 20,
+    marginBottom: 10,
     alignItems: 'center',
   },
   addButtonText: {
