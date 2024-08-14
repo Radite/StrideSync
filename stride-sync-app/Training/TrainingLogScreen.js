@@ -55,9 +55,23 @@ const filterData = () => {
     }
 
     const queryLowerCase = searchQuery.toLowerCase();
+
+    // Check if any EventDetails match the query
+    const matchesEventDetails = session.EventDetails.some(eventDetail => {
+      return (
+        (eventDetail.grass && 'grass'.includes(queryLowerCase)) ||
+        (eventDetail.spikes && 'spikes'.includes(queryLowerCase)) ||
+        (eventDetail.sled && 'sled'.includes(queryLowerCase))
+      );
+    });
+
+    // Check if any part of the session matches the query
     const matchesQuery = session.SessionType.toLowerCase().includes(queryLowerCase) ||
                           session.Notes.toLowerCase().includes(queryLowerCase) ||
-                          session.EventDetails.some(event => event.Event.toLowerCase().includes(queryLowerCase));
+                          matchesEventDetails ||
+                          session.EventDetails.some(eventDetail => 
+                            typeof eventDetail.Event === 'string' && eventDetail.Event.toLowerCase().includes(queryLowerCase)
+                          );
 
     return withinDateRange && matchesQuery;
   });
@@ -275,8 +289,10 @@ const eventNameMapping = {
 // Update the renderSessionHistory function
 const renderSessionHistory = () => {
   return filteredData.map((session, index) => {
-    // Extract event details
-    const events = session.EventDetails.map(event => event.Event).join(', ');
+    // Safely handle EventDetails
+    const events = session.EventDetails && Array.isArray(session.EventDetails)
+      ? session.EventDetails.map(event => event.Event).join(', ')
+      : 'No events available';
 
     return (
       <TouchableOpacity
@@ -292,6 +308,7 @@ const renderSessionHistory = () => {
     );
   });
 };
+
   return (
     <View style={styles.container}>
       <Header title="Training Log" navigation={navigation} />

@@ -35,12 +35,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
   }
 
   const {
-    SessionDate, SessionType, EventDetails, IntensityPercentage, Notes,
-    TotalDistanceHighJumped, TotalDistanceLongJumped, TotalDistancePoleVaulted,
-    TotalDistanceShotPut, TotalDistanceDiscusThrown, TotalDistanceJavelinThrown, TotalDistanceHammerThrown,
-    TotalDistanceTripleJumped, TotalDistanceRan, TotalTimeRan, NumberOfLongJumps, NumberOfHighJumps,
-    NumberOfPoleVaults, NumberOfShotPuts, NumberOfDiscusThrows, NumberOfJavelinThrows, NumberOfHammerThrows,
-    NumberOfTripleJumps
+    SessionDate, SessionType, EventDetails, IntensityPercentage, Notes
   } = sessionDetails;
 
   return (
@@ -64,10 +59,14 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
           <View style={styles.eventList}>
             {EventDetails.map((event, index) => (
               <View key={index} style={styles.eventItem}>
-                <Text style={styles.eventText}>Event: {event.Event}</Text>
+                <Text style={styles.eventText}>Event: {event.Event} meters</Text>
                 <Text style={styles.eventText}>Reps: {event.Reps}</Text>
-                {event.Sets && <Text style={styles.eventText}>Sets: {event.Sets}</Text>}
-                {event.Height && <Text style={styles.eventText}>Height: {event.Height}</Text>}
+                <Text style={styles.eventText}>Marks: {event.Marks.map(mark => mark.Mark).join(', ')}</Text>
+                <Text style={styles.eventText}>Total Distance: {event.TotalDistance} meters</Text>
+                <Text style={styles.eventText}>Total Time: {event.TotalTime} seconds</Text>
+                <Text style={styles.eventText}>Grass: {event.grass ? 'Yes' : 'No'}</Text>
+                <Text style={styles.eventText}>Spikes: {event.spikes ? 'Yes' : 'No'}</Text>
+                <Text style={styles.eventText}>Sled: {event.sled ? 'Yes' : 'No'}</Text>
               </View>
             ))}
           </View>
@@ -81,55 +80,6 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Totals */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Totals</Text>
-          <View style={styles.totalsContainer}>
-            <View style={styles.totalColumn}>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Total Distance Ran</Text>
-                <Text style={styles.cardValue}>{TotalDistanceRan} meters</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>High Jumps</Text>
-                <Text style={styles.cardValue}>{NumberOfHighJumps} (Total Distance: {TotalDistanceHighJumped} meters)</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Long Jumps</Text>
-                <Text style={styles.cardValue}>{NumberOfLongJumps} (Total Distance: {TotalDistanceLongJumped} meters)</Text>
-              </View>
-            </View>
-            <View style={styles.totalColumn}>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Pole Vaults</Text>
-                <Text style={styles.cardValue}>{NumberOfPoleVaults} (Total Distance: {TotalDistancePoleVaulted} meters)</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Triple Jumps</Text>
-                <Text style={styles.cardValue}>{NumberOfTripleJumps} (Total Distance: {TotalDistanceTripleJumped} meters)</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Shot Puts</Text>
-                <Text style={styles.cardValue}>{NumberOfShotPuts} (Total Distance: {TotalDistanceShotPut} meters)</Text>
-              </View>
-            </View>
-            <View style={styles.totalColumn}>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Discus Throws</Text>
-                <Text style={styles.cardValue}>{NumberOfDiscusThrows} (Total Distance: {TotalDistanceDiscusThrown} meters)</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Javelin Throws</Text>
-                <Text style={styles.cardValue}>{NumberOfJavelinThrows} (Total Distance: {TotalDistanceJavelinThrown} meters)</Text>
-              </View>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Hammer Throws</Text>
-                <Text style={styles.cardValue}>{NumberOfHammerThrows} (Total Distance: {TotalDistanceHammerThrown} meters)</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
       </ScrollView>
       <Footer navigation={navigation} activeScreen="TrainingLog" />
     </SafeAreaView>
@@ -139,7 +89,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1C1C',
+    backgroundColor: '#121212', // Darker background for modern look
   },
   content: {
     paddingHorizontal: 20,
@@ -147,64 +97,57 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   card: {
-    backgroundColor: '#2C2C2C',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    borderColor: '#444',
+    backgroundColor: '#1E1E1E', // Use a slightly lighter background for cards
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 15,
+    borderColor: '#2A2A2A', // Subtle border color
     borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-    width: width - 40, // Adjust width based on screen dimensions
+    shadowRadius: 5,
+    elevation: 5,
+    width: width - 40,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#FFB74D',
+    color: '#FFC107', // Updated to a more modern yellow accent
   },
   cardValue: {
-    fontSize: 14,
-    color: '#E0E0E0',
-    marginTop: 5,
+    fontSize: 15,
+    color: '#F5F5F5', // Slightly lighter text for contrast
+    marginTop: 8,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 25,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
-    color: '#FFB74D',
-    marginBottom: 10,
+    color: '#FFC107',
+    marginBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#444',
-    paddingBottom: 5,
+    borderBottomColor: '#2A2A2A',
+    paddingBottom: 8,
   },
   eventList: {
-    backgroundColor: '#2C2C2C',
-    borderRadius: 10,
-    padding: 15,
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    padding: 20,
   },
   eventItem: {
-    marginBottom: 10,
+    marginBottom: 15,
   },
   eventText: {
-    fontSize: 14,
-    color: '#E0E0E0',
-  },
-  totalsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  totalColumn: {
-    flex: 1,
-    marginHorizontal: 5,
+    fontSize: 15,
+    color: '#F5F5F5',
+    lineHeight: 22,
   },
   errorText: {
-    color: '#E0E0E0',
-    fontSize: 16,
+    color: '#F5F5F5',
+    fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
   },
