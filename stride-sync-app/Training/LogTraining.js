@@ -33,35 +33,6 @@ const LogTraining = ({ navigation }) => {
     return distance;
   };
 
-  // Calculate total distance for running events
-  const calculateTotalDistance = () => {
-    return trainingLogs
-      .filter(log => log.eventType === 'running')
-      .reduce((total, log) => {
-        const distanceInMeters = convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit);
-        return total + (distanceInMeters * (parseInt(log.reps) || 0));
-      }, 0);
-  };
-
-  // Calculate total distance for field events
-  const calculateFieldEventTotal = (eventType) => {
-    return trainingLogs
-      .filter(log => log.eventType === eventType)
-      .reduce((total, log) => {
-        const distanceInMeters = convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit);
-        return total + (distanceInMeters * (parseInt(log.reps) || 0));
-      }, 0);
-  };
-
-  // Calculate total time for running events
-  const calculateTotalTimeRan = () => {
-    return trainingLogs
-      .filter(log => log.eventType === 'running')
-      .reduce((total, log) => {
-        const timePerMark = parseFloat(log.marks.join(',').split(',').reduce((acc, mark) => acc + (parseFloat(mark) || 0), 0)) || 0;
-        return total + (timePerMark * (parseInt(log.reps) || 0));
-      }, 0);
-  };
 
   const handleInputChange = (index, field, value) => {
     const newLogs = [...trainingLogs];
@@ -166,6 +137,21 @@ const LogTraining = ({ navigation }) => {
   // Calculate TotalDistanceTripleJumped
   const TotalDistanceTripleJumped = calculateTotalDistance(EventDetails, 'triple_jump');
 
+  // General function to calculate the total number of repetitions for a given sub-event
+  const calculateTotalReps = (logs, subEventType) => 
+    logs
+      .filter(log => log.subEvent === subEventType)
+      .reduce((total, log) => total + (parseInt(log.reps, 10) || 0), 0);
+
+  // Calculate the number of different events
+  const NumberOfLongJumps = calculateTotalReps(trainingLogs, 'long_jump');
+  const NumberOfHighJumps = calculateTotalReps(trainingLogs, 'high_jump');
+  const NumberOfPoleVaults = calculateTotalReps(trainingLogs, 'pole_vault');
+  const NumberOfShotPuts = calculateTotalReps(trainingLogs, 'shot_put');
+  const NumberOfDiscusThrows = calculateTotalReps(trainingLogs, 'discus');
+  const NumberOfJavelinThrows = calculateTotalReps(trainingLogs, 'javelin');
+  const NumberOfHammerThrows = calculateTotalReps(trainingLogs, 'hammer');
+  const NumberOfTripleJumps = calculateTotalReps(trainingLogs, 'triple_jump');
     
   // Payload for training session details
   const trainingPayload = {
@@ -176,7 +162,7 @@ const LogTraining = ({ navigation }) => {
     SpecialConditions: {
       Surface: trainingLogs[0]?.spikes ? 'Spikes' : 'No Spikes',
     },
-    IntensityPercentage: 0, // Placeholder for intensity
+    IntensityPercentage: 80, // Placeholder for intensity
     Notes: notes,
       // Total Distance for Each Event
       TotalDistanceHighJumped: TotalDistanceHighJumped,
@@ -187,58 +173,50 @@ const LogTraining = ({ navigation }) => {
       TotalDistanceJavelinThrown: TotalDistanceJavelinThrown,
       TotalDistanceHammerThrown: TotalDistanceHammerThrown,
       TotalDistanceTripleJumped: TotalDistanceTripleJumped,
+      NumberOfLongJumps: NumberOfLongJumps,
+      NumberOfHighJumps: NumberOfHighJumps,
+      NumberOfPoleVaults: NumberOfPoleVaults,
+      NumberOfShotPuts: NumberOfShotPuts,
+      NumberOfDiscusThrows: NumberOfDiscusThrows,
+      NumberOfJavelinThrows: NumberOfJavelinThrows,
+      NumberOfHammerThrows: NumberOfHammerThrows,
+      NumberOfTripleJumps: NumberOfTripleJumps,
       
-  NumberOfLongJumps: trainingLogs
-    .filter(log => log.subEvent === 'long_jump')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfHighJumps: trainingLogs
-    .filter(log => log.subEvent === 'high_jump')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfPoleVaults: trainingLogs
-    .filter(log => log.subEvent === 'pole_vault')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfShotPuts: trainingLogs
-    .filter(log => log.subEvent === 'shot_put')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfDiscusThrows: trainingLogs
-    .filter(log => log.subEvent === 'discus')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfJavelinThrows: trainingLogs
-    .filter(log => log.subEvent === 'javelin')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfHammerThrows: trainingLogs
-    .filter(log => log.subEvent === 'hammer')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
-  NumberOfTripleJumps: trainingLogs
-    .filter(log => log.subEvent === 'triple_jump')
-    .reduce((total, log) => total + parseInt(log.reps, 10) || 0, 0),
-
     TotalDistanceRan: TotalDistanceRan,
     TotalTimeRan: TotalTimeRan,
   };
 
-  // Payload for profile update with only TotalDistanceRan and TotalTimeRan
-  const profileUpdatePayload = {
-    AthleteID: 1,
-    TotalDistanceRan: TotalDistanceRan,
-    TotalTimeRan: TotalTimeRan,
-  };
+// Payload for profile update
+const profileUpdatePayload = {
+  AthleteID: 1, // Use profileUpdatePayload.AthleteID for consistency
+  TotalDistanceRan: TotalDistanceRan,
+  TotalTimeRan: TotalTimeRan,
+  TotalDistanceHighJumped: TotalDistanceHighJumped,
+  TotalDistanceLongJumped: TotalDistanceLongJumped,
+  TotalDistancePoleVaulted: TotalDistancePoleVaulted,
+  TotalDistanceShotPut: TotalDistanceShotPut,
+  TotalDistanceDiscusThrown: TotalDistanceDiscusThrown,
+  TotalDistanceJavelinThrown: TotalDistanceJavelinThrown,
+  TotalDistanceHammerThrown: TotalDistanceHammerThrown,
+  TotalDistanceTripleJumped: TotalDistanceTripleJumped,
+  TotalTimesLongJumped: NumberOfLongJumps,
+  TotalTimesHighJumped: NumberOfHighJumps,
+  TotalTimesPoleVaulted: NumberOfPoleVaults,
+  TotalTimesShotPut: NumberOfShotPuts,
+  TotalTimesDiscusThrown: NumberOfDiscusThrows,
+  TotalTimesJavelinThrown: NumberOfJavelinThrows,
+  TotalTimesHammerThrown: NumberOfHammerThrows,
+  TotalTimesTripleJumped: NumberOfTripleJumps,
+};
 
-  // Submit training session details
-  fetch('http://192.168.100.71:3000/api/training-sessions/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(trainingPayload),
-  })
+// Submit training session details
+fetch('http://192.168.100.71:3000/api/training-sessions/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(trainingPayload),
+})
   .then(response => response.json())
   .then(data => {
     console.log('Training session submitted successfully:', data);
@@ -252,6 +230,23 @@ const LogTraining = ({ navigation }) => {
           AthleteID: profileUpdatePayload.AthleteID,
           TotalDistanceRan: (profileData.TotalDistanceRan || 0) + TotalDistanceRan,
           TotalTimeRan: (profileData.TotalTimeRan || 0) + TotalTimeRan,
+          TotalDistanceHighJumped: (profileData.TotalDistanceHighJumped || 0) + TotalDistanceHighJumped,
+          TotalDistanceLongJumped: (profileData.TotalDistanceLongJumped || 0) + TotalDistanceLongJumped,
+          TotalDistancePoleVaulted: (profileData.TotalDistancePoleVaulted || 0) + TotalDistancePoleVaulted,
+          TotalDistanceShotPut: (profileData.TotalDistanceShotPut || 0) + TotalDistanceShotPut,
+          TotalDistanceDiscusThrown: (profileData.TotalDistanceDiscusThrown || 0) + TotalDistanceDiscusThrown,
+          TotalDistanceJavelinThrown: (profileData.TotalDistanceJavelinThrown || 0) + TotalDistanceJavelinThrown,
+          TotalDistanceHammerThrown: (profileData.TotalDistanceHammerThrown || 0) + TotalDistanceHammerThrown,
+          TotalDistanceTripleJumped: (profileData.TotalDistanceTripleJumped || 0) + TotalDistanceTripleJumped,
+          TotalTimesLongJumped: (profileData.TotalTimesLongJumped || 0) + NumberOfLongJumps,
+          TotalTimesHighJumped: (profileData.TotalTimesHighJumped || 0) + NumberOfHighJumps,
+          TotalTimesPoleVaulted: (profileData.TotalTimesPoleVaulted || 0) + NumberOfPoleVaults,
+          TotalTimesShotPut: (profileData.TotalTimesShotPut || 0) + NumberOfShotPuts,
+          TotalTimesDiscusThrown: (profileData.TotalTimesDiscusThrown || 0) + NumberOfDiscusThrows,
+          TotalTimesJavelinThrown: (profileData.TotalTimesJavelinThrown || 0) + NumberOfJavelinThrows,
+          TotalTimesHammerThrown: (profileData.TotalTimesHammerThrown || 0) + NumberOfHammerThrows,
+          TotalTimesTripleJumped: (profileData.TotalTimesTripleJumped || 0) + NumberOfTripleJumps,
+          UpdatedAt: new Date().toISOString()
         };
 
         // Update athlete profile with new totals
@@ -269,10 +264,11 @@ const LogTraining = ({ navigation }) => {
     console.log('Athlete profile updated successfully:', data);
     // Handle success (e.g., navigate to another screen or show a success message)
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('Error:', error);
     // Handle error (e.g., show an error message)
   });
+
 };
   
 return (
@@ -305,7 +301,6 @@ return (
           value={trainingType}
           onValueChange={(itemValue) => setTrainingType(itemValue)}
           items={[
-            { label: 'Select Training Type', value: '' },
             { label: 'Speed', value: 'speed' },
             { label: 'Interval', value: 'interval' },
             { label: 'Tempo', value: 'tempo' },
@@ -318,6 +313,7 @@ return (
             { label: 'Power', value: 'power' },
             { label: 'Other', value: 'other' },
           ]}
+          placeholder={{ label: 'Select Training Type', value: '' }}
           style={pickerSelectStyles}
         />
       </View>
@@ -328,15 +324,16 @@ return (
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Event Type</Text>
             <RNPickerSelect
-              value={log.eventType}
+              value={log.eventType || ''}
               onValueChange={(itemValue) => handleInputChange(index, 'eventType', itemValue)}
               items={[
-                { label: 'Select Event Type', value: '' },
                 { label: 'Running', value: 'running' },
                 { label: 'Field Event', value: 'field' },
               ]}
+              placeholder={{ label: 'Select Event Type', value: '' }}
               style={pickerSelectStyles}
             />
+
           </View>
 
           {/* Conditional Sub-Event Selector for Field Events */}
@@ -348,7 +345,6 @@ return (
                   value={log.subEvent}
                   onValueChange={(itemValue) => handleInputChange(index, 'subEvent', itemValue)}
                   items={[
-                    { label: 'Select Field Event', value: '' },
                     { label: 'Long Jump', value: 'long_jump' },
                     { label: 'High Jump', value: 'high_jump' },
                     { label: 'Pole Vault', value: 'pole_vault' },
@@ -357,6 +353,7 @@ return (
                     { label: 'Javelin', value: 'javelin' },
                     { label: 'Triple Jump', value: 'triple_jump' },
                   ]}
+                  placeholder={{ label: 'Select Field Event', value: '' }}
                   style={pickerSelectStyles}
                 />
               </View>
