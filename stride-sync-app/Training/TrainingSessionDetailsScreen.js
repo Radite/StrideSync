@@ -42,15 +42,22 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header title="Training Session" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.content}>
-        
+      <Text style={styles.sectionTitle}>Training Overview</Text>
+
         {/* Card for Date, Type, and Intensity */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Date</Text>
-          <Text style={styles.cardValue}>{format(new Date(SessionDate), 'MMM dd, yyyy')}</Text>
-          <Text style={styles.cardTitle}>Type</Text>
-          <Text style={styles.cardValue}>{SessionType}</Text>
-          <Text style={styles.cardTitle}>Intensity</Text>
-          <Text style={styles.cardValue}>{IntensityPercentage}%</Text>
+        <View style={styles.detailsCard}>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Date</Text>
+            <Text style={styles.detailValue}>{format(new Date(SessionDate), 'MMM dd, yyyy')}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Type</Text>
+            <Text style={styles.detailValue}>{SessionType}</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Intensity</Text>
+            <Text style={styles.detailValue}>{IntensityPercentage}%</Text>
+          </View>
         </View>
         
         {/* Event Details */}
@@ -97,7 +104,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notes</Text>
           <View style={styles.card}>
-            <Text style={styles.cardValue}>{Notes}</Text>
+          <Text style={styles.cardValue}>{Notes}</Text>
           </View>
         </View>
 
@@ -117,12 +124,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     marginTop: 10,
   },
-  card: {
-    backgroundColor: '#1E1E1E', // Use a slightly lighter background for cards
+  detailsCard: {
+    backgroundColor: '#1E1E1E',
     borderRadius: 12,
     padding: 20,
-    marginBottom: 15,
-    borderColor: '#2A2A2A', // Subtle border color
+    marginBottom: 20,
+    borderColor: '#2A2A2A',
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -130,16 +137,22 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
     width: width - 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Space items evenly across the card
   },
-  cardTitle: {
+  detailItem: {
+    alignItems: 'center', // Center the text items in each column
+  },
+  detailLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#BBBBBB', // Subtle color for the label
+    marginBottom: 8,
+  },
+  detailValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFC107', // Updated to a more modern yellow accent
-  },
-  cardValue: {
-    fontSize: 15,
-    color: '#F5F5F5', // Slightly lighter text for contrast
-    marginTop: 8,
+    fontWeight: '700',
+    color: '#FFFFFF', // Bright color for the value
   },
   section: {
     marginBottom: 25,
@@ -190,6 +203,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
+  },
+  card: {
+    backgroundColor: '#1E1E1E', // Use a slightly lighter background for cards
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 15,
+    borderColor: '#2A2A2A', // Subtle border color
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+    width: width - 40,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFC107', // Updated to a more modern yellow accent
+  },
+  cardValue: {
+    fontSize: 15,
+    color: '#F5F5F5', // Slightly lighter text for contrast
+    marginTop: 8,
   },
 });
 
