@@ -58,15 +58,36 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
           <Text style={styles.sectionTitle}>Event Details</Text>
           <View style={styles.eventList}>
             {EventDetails.map((event, index) => (
-              <View key={index} style={styles.eventItem}>
-                <Text style={styles.eventText}>Event: {event.Event} meters</Text>
-                <Text style={styles.eventText}>Reps: {event.Reps}</Text>
-                <Text style={styles.eventText}>Marks: {event.Marks.map(mark => mark.Mark).join(', ')}</Text>
-                <Text style={styles.eventText}>Total Distance: {event.TotalDistance} meters</Text>
-                <Text style={styles.eventText}>Total Time: {event.TotalTime} seconds</Text>
-                <Text style={styles.eventText}>Grass: {event.grass ? 'Yes' : 'No'}</Text>
-                <Text style={styles.eventText}>Spikes: {event.spikes ? 'Yes' : 'No'}</Text>
-                <Text style={styles.eventText}>Sled: {event.sled ? 'Yes' : 'No'}</Text>
+              <View key={index} style={styles.eventCard}>
+                <Text style={styles.eventTitle}>Event: {event.Event} meters</Text>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Reps:</Text>
+                  <Text style={styles.eventValue}>{event.Reps}</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Marks:</Text>
+                  <Text style={styles.eventValue}>{event.Marks.map(mark => mark.Mark).join(', ')}</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Total Distance:</Text>
+                  <Text style={styles.eventValue}>{event.TotalDistance} meters</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Total Time:</Text>
+                  <Text style={styles.eventValue}>{event.TotalTime} seconds</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Grass:</Text>
+                  <Text style={styles.eventValue}>{event.grass ? 'Yes' : 'No'}</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Spikes:</Text>
+                  <Text style={styles.eventValue}>{event.spikes ? 'Yes' : 'No'}</Text>
+                </View>
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Sled:</Text>
+                  <Text style={styles.eventValue}>{event.sled ? 'Yes' : 'No'}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -137,13 +158,32 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
   },
-  eventItem: {
+  eventCard: {
+    backgroundColor: '#2A2A2A',
+    borderRadius: 10,
+    padding: 15,
     marginBottom: 15,
   },
-  eventText: {
-    fontSize: 15,
-    color: '#F5F5F5',
-    lineHeight: 22,
+  eventTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFC107',
+    marginBottom: 10,
+  },
+  eventRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  eventLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#BBBBBB',
+  },
+  eventValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
   errorText: {
     color: '#F5F5F5',
