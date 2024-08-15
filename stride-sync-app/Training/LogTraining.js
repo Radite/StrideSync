@@ -121,10 +121,10 @@ const LogTraining = ({ navigation }) => {
   const handleSubmit = () => {
     if (validateFields()) {
 
-    const formattedDate = "2024-08-11"; // Example formatted date
-    const trainingType = "Interval"; // Example training type
-    const notes = "Training session went well."; // Example notes
-    
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    console.log('Formatted Date:', formattedDate);
+    console.log('Training Type:', trainingType);
+    console.log('Notes:', notes);
 // Process training logs to calculate event details
 const EventDetails = trainingLogs.map(log => ({
   EventType: log.eventType,
