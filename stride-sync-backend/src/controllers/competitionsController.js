@@ -25,16 +25,27 @@ exports.getCompetitionById = async (req, res) => {
 // Create a new competition
 exports.createCompetition = async (req, res) => {
   const { AthleteID, CompetitionName, CompetitionDate, EventResults, Notes } = req.body;
+
+  // Validate input
+  if (!AthleteID || !CompetitionName || !CompetitionDate || !EventResults) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
   try {
+    // Perform the insert query
     const [result] = await db.query(
       'INSERT INTO Competitions (AthleteID, CompetitionName, CompetitionDate, EventResults, Notes) VALUES (?, ?, ?, ?, ?)',
       [AthleteID, CompetitionName, CompetitionDate, JSON.stringify(EventResults), Notes]
     );
+
+    // Respond with the new CompetitionID
     res.status(201).json({ CompetitionID: result.insertId });
   } catch (err) {
+    // Handle errors
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Update a competition
 exports.updateCompetition = async (req, res) => {
