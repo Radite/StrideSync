@@ -5,6 +5,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { format } from 'date-fns';
 import Header from '../Header'; // Adjust the import path as needed
 import Footer from '../Footer'; // Adjust the import path as needed
+import { Platform } from 'react-native';
 
 const LogTraining = ({ navigation }) => {
   const [trainingType, setTrainingType] = useState('');

@@ -23,13 +23,6 @@ const Footer = ({ navigation, activeScreen }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.bottomBarItem}
-        onPress={() => navigation.navigate('PerformancePrediction')}
-      >
-        <Ionicons name="stats-chart-outline" size={24} color={getIconColor('PerformancePrediction')} />
-        <Text style={styles.bottomBarText}>Performances</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.bottomBarItem}
         onPress={() => navigation.navigate('CompetitionLog')}
       >
         <Ionicons name="calendar-outline" size={24} color={getIconColor('CompetitionLog')} />
@@ -37,17 +30,18 @@ const Footer = ({ navigation, activeScreen }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.bottomBarItem}
+        onPress={() => navigation.navigate('PerformancePrediction')}
+      >
+        <Ionicons name="stats-chart-outline" size={24} color={getIconColor('PerformancePrediction')} />
+        <Text style={styles.bottomBarText}>Performances</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.bottomBarItem}
         onPress={() => navigation.navigate('AdvancedDataVisualization')}
       >
         <Ionicons name="analytics-outline" size={24} color={getIconColor('AdvancedDataVisualization')} />
         <Text style={styles.bottomBarText}>Analytics</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.bottomBarItem}
-        onPress={() => navigation.navigate('Plan')}
-      >
-        <Ionicons name="reader-outline" size={24} color={getIconColor('Plan')} />
-        <Text style={styles.bottomBarText}>Plan</Text>
       </TouchableOpacity>
     </View>
   );

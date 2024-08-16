@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import CompetitionDetailScreen from './Competition/CompetitionDetailScreen'; // Import the new screen
 
 // Import screens
 import LoginScreen from './Startup/LoginScreen';
@@ -94,6 +95,7 @@ const App = () => {
           <Stack.Screen name="TrainingSessionDetails" component={TrainingSessionDetailsScreen} />
           <Stack.Screen name="PerformancePrediction" component={PerformancePredictionScreen} />
           <Stack.Screen name="CompetitionLog" component={CompetitionLogScreen} />
+          <Stack.Screen name="CompetitionDetails" component={CompetitionDetailScreen} />
           <Stack.Screen name="LogCompetition" component={LogCompetitionScreen} />
           <Stack.Screen name="AdvancedDataVisualization" component={AdvancedDataVisualizationScreen} />
         </Stack.Navigator>
