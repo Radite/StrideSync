@@ -4,6 +4,31 @@ import { format } from 'date-fns';
 import Header from '../Header';
 import Footer from '../Footer';
 
+// Function to get the ordinal suffix
+const getOrdinal = (number) => {
+  const j = number % 10;
+  const k = number % 100;
+  if (j === 1 && k !== 11) {
+    return `${number}st`;
+  }
+  if (j === 2 && k !== 12) {
+    return `${number}nd`;
+  }
+  if (j === 3 && k !== 13) {
+    return `${number}rd`;
+  }
+  return `${number}th`;
+};
+
+// Function to determine the mark unit
+const getMarkUnit = (eventName) => {
+  // Check if event ends with "m" or contains certain keywords
+  if (eventName.endsWith('m') || eventName.includes('steeplechase') || eventName.includes('marathon')) {
+    return 's'; // Seconds for running events
+  }
+  return 'm'; // Meters for other events
+};
+
 const CompetitionDetailScreen = ({ route }) => {
   const { competition } = route.params;
 
@@ -25,11 +50,13 @@ const CompetitionDetailScreen = ({ route }) => {
               <Text style={styles.eventTitle}>{result.Event}</Text>
               <View style={styles.eventRow}>
                 <Text style={styles.eventLabel}>Position:</Text>
-                <Text style={styles.eventValue}>{result.Position}</Text>
+                <Text style={styles.eventValue}>{getOrdinal(result.Position)}</Text>
               </View>
               <View style={styles.eventRow}>
                 <Text style={styles.eventLabel}>Mark:</Text>
-                <Text style={styles.eventValue}>{result.Mark}</Text>
+                <Text style={styles.eventValue}>
+                  {result.Mark}{getMarkUnit(result.Event)}
+                </Text>
               </View>
             </View>
           ))}

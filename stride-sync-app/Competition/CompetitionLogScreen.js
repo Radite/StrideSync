@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
 import Footer from '../Footer';
 import Header from '../Header';
 import { format, startOfWeek, endOfWeek, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CompetitionLogScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +17,8 @@ const CompetitionLogScreen = ({ navigation }) => {
   const [competitions, setCompetitions] = useState([]);
   const [uniqueEvents, setUniqueEvents] = useState([]);
 
-  useEffect(() => {
+  // Fetch data and set unique events
+  const fetchCompetitions = useCallback(() => {
     fetch('http://192.168.100.71:3000/api/competitions/athlete/1')
       .then(response => response.json())
       .then(data => {
@@ -32,6 +34,12 @@ const CompetitionLogScreen = ({ navigation }) => {
         Alert.alert('Error', 'Failed to fetch competition data.');
       });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCompetitions();
+    }, [fetchCompetitions])
+  );
 
   useEffect(() => {
     if (competitions.length > 0) {
@@ -59,7 +67,7 @@ const CompetitionLogScreen = ({ navigation }) => {
         const end = endOfMonth(subMonths(today, 1));
         withinDateRange = competitionDate >= start && competitionDate <= end;
       } else if (dateFilter === 'all_time') {
-        withinDateRange = true;
+        withinDateRange = competitionDate >= new Date('1999-12-31') && competitionDate <= today;
       } else if (dateFilter === 'custom_range') {
         withinDateRange = competitionDate >= new Date(startDate) && competitionDate <= new Date(endDate);
       }
@@ -120,18 +128,35 @@ const CompetitionLogScreen = ({ navigation }) => {
   };
 
   const setToday = () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    setStartDate(today);
+    setEndDate(today);
     setDateFilter('today');
   };
 
   const setLastWeek = () => {
+    const today = new Date();
+    const startDateWeek = startOfWeek(today);
+    const endDateWeek = endOfWeek(today);
+    const start = subDays(startDateWeek, 7);
+    const end = subDays(endDateWeek, 7);
+    setStartDate(format(start, 'yyyy-MM-dd'));
+    setEndDate(format(end, 'yyyy-MM-dd'));
     setDateFilter('last_week');
   };
 
   const setLastMonth = () => {
+    const today = new Date();
+    const start = startOfMonth(subMonths(today, 1));
+    const end = endOfMonth(subMonths(today, 1));
+    setStartDate(format(start, 'yyyy-MM-dd'));
+    setEndDate(format(end, 'yyyy-MM-dd'));
     setDateFilter('last_month');
   };
 
   const setAllTime = () => {
+    setStartDate('1999-12-31');
+    setEndDate(format(new Date(), 'yyyy-MM-dd'));
     setDateFilter('all_time');
   };
 
@@ -175,6 +200,10 @@ const CompetitionLogScreen = ({ navigation }) => {
           <Text style={styles.filterText}>
             {dateFilter === 'custom_range'
               ? `${format(new Date(startDate), 'MMM dd')} - ${format(new Date(endDate), 'MMM dd')}`
+              : dateFilter === 'all_time'
+              ? `Dec 31, 1999 - ${format(new Date(), 'MMM dd')}`
+              : startDate && endDate
+              ? `${format(new Date(startDate), 'MMM dd')} - ${format(new Date(endDate), 'MMM dd')}`
               : 'Select Range'}
           </Text>
           <Text style={styles.arrow}>▼</Text>
@@ -197,21 +226,6 @@ const CompetitionLogScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-
-      <View style={styles.filterContainer}>
-        <Text style={styles.filterLabel}>Filter by Event:</Text>
-        <View style={styles.quickLinksContainer}>
-          {uniqueEvents.map((event, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.quickLink, eventFilter === event && styles.activeFilter]}
-              onPress={() => setEventFilter(event)}
-            >
-              <Text style={styles.quickLinkText}>{event}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       </View>
 
       <View style={styles.searchContainer}>
@@ -261,7 +275,6 @@ const CompetitionLogScreen = ({ navigation }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

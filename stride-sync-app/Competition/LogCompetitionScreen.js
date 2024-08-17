@@ -6,9 +6,9 @@ import Footer from '../Footer';
 import Header from '../Header';
 
 const eventOptions = [
-  '60m', '100m', '200m', '400m', '800m', '1500m', '3000m', '3000m steeplechase', '5000m', '10000m', 
-  'marathon', 'half marathon', 'long jump', 'high jump', 'pole vault', 'shot put', 'javelin', 
-  'discus', 'hammer throw'
+  '60m', '100m', '200m', '400m', '800m', '1500m', '3000m', '3000m Steeplechase', '5000m', '10000m', 
+  'Marathon', 'Half Marathon', 'Long Jump', 'High Jump', 'Pole Vault', 'Shot Put', 'Javelin', 
+  'Discus', 'Hammer Throw'
 ];
 
 const LogCompetitionScreen = ({ navigation }) => {
