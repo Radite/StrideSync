@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions, FlatList } from 'react-native';
 import Footer from '../Footer'; 
 import Header from '../Header'; 
 import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
 import moment from 'moment';
+import { useFocusEffect } from '@react-navigation/native'; // Import the useFocusEffect hook
 
 const { width } = Dimensions.get('window');
 
@@ -41,65 +42,72 @@ const DashboardScreen = ({ navigation }) => {
   const [intensityData, setIntensityData] = useState({ labels: [], datasets: [] });
   const [dailyQuote, setDailyQuote] = useState(getDailyQuote());
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const distanceResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/distance');
-        const distances = distanceResponse.data;
-        setTotalDistanceRan(distances.totalDistanceRan);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const distanceResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/distance');
+      const distances = distanceResponse.data;
+      setTotalDistanceRan(distances.totalDistanceRan);
+  
+      const eventCountsResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/event-counts-and-distance');
+      const eventCounts = eventCountsResponse.data;
+      setTotalTimeRan(eventCounts.totalTimeRan);
+  
+      const formattedStats = {
+        highJump: { total: distances.totalDistanceHighJumped, average: (eventCounts.totalHighJumps > 0 ? (distances.totalDistanceHighJumped / eventCounts.totalHighJumps).toFixed(2) : 0) },
+        longJump: { total: distances.totalDistanceLongJumped, average: (eventCounts.totalLongJumps > 0 ? (distances.totalDistanceLongJumped / eventCounts.totalLongJumps).toFixed(2) : 0) },
+        poleVault: { total: distances.totalDistancePoleVaulted, average: (eventCounts.totalPoleVaults > 0 ? (distances.totalDistancePoleVaulted / eventCounts.totalPoleVaults).toFixed(2) : 0) },
+        shotPut: { total: distances.totalDistanceShotPut, average: (eventCounts.totalShotPuts > 0 ? (distances.totalDistanceShotPut / eventCounts.totalShotPuts).toFixed(2) : 0) },
+        discus: { total: distances.totalDistanceDiscusThrown, average: (eventCounts.totalDiscusThrows > 0 ? (distances.totalDistanceDiscusThrown / eventCounts.totalDiscusThrows).toFixed(2) : 0) },
+        javelin: { total: distances.totalDistanceJavelinThrown, average: (eventCounts.totalJavelinThrows > 0 ? (distances.totalDistanceJavelinThrown / eventCounts.totalJavelinThrows).toFixed(2) : 0) },
+        hammerThrow: { total: distances.totalDistanceHammerThrown, average: (eventCounts.totalHammerThrows > 0 ? (distances.totalDistanceHammerThrown / eventCounts.totalHammerThrows).toFixed(2) : 0) }
+      };
+  
+      setFieldEventStats(formattedStats);
+  
+      const competitionsResponse = await axios.get('http://192.168.100.71:3000/api/competitions/athlete/1');
+      const competitions = competitionsResponse.data;
+      setUpcomingEvents(competitions.filter(competition => new Date(competition.CompetitionDate) > new Date()));
+  
+      const trainingSessionsResponse = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
+      const trainingSessions = trainingSessionsResponse.data;
+  
+      const groupedByWeek = trainingSessions.reduce((acc, session) => {
+        const date = moment(session.SessionDate);
+        const weekStart = date.startOf('week').format('YYYY-MM-DD');
+        if (!acc[weekStart]) acc[weekStart] = [];
+        acc[weekStart].push(session.IntensityPercentage);
+        return acc;
+      }, {});
+  
+      // Sort labels by date
+      const labels = Object.keys(groupedByWeek).sort((a, b) => new Date(a) - new Date(b));
+      
+      // Map sorted labels to data
+      const data = labels.map(date => {
+        const percentages = groupedByWeek[date];
+        const avgIntensity = percentages.length > 0 ? (percentages.reduce((a, b) => a + b) / percentages.length).toFixed(2) : 0;
+        return parseFloat(avgIntensity);
+      });
+  
+      setIntensityData({
+        labels,
+        datasets: [{ data }]
+      });
+  
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
-        const eventCountsResponse = await axios.get('http://192.168.100.71:3000/api/athlete-profiles/1/event-counts-and-distance');
-        const eventCounts = eventCountsResponse.data;
-        setTotalTimeRan(eventCounts.totalTimeRan);
-
-        const formattedStats = {
-          highJump: { total: distances.totalDistanceHighJumped, average: (eventCounts.totalHighJumps > 0 ? (distances.totalDistanceHighJumped / eventCounts.totalHighJumps).toFixed(2) : 0) },
-          longJump: { total: distances.totalDistanceLongJumped, average: (eventCounts.totalLongJumps > 0 ? (distances.totalDistanceLongJumped / eventCounts.totalLongJumps).toFixed(2) : 0) },
-          poleVault: { total: distances.totalDistancePoleVaulted, average: (eventCounts.totalPoleVaults > 0 ? (distances.totalDistancePoleVaulted / eventCounts.totalPoleVaults).toFixed(2) : 0) },
-          shotPut: { total: distances.totalDistanceShotPut, average: (eventCounts.totalShotPuts > 0 ? (distances.totalDistanceShotPut / eventCounts.totalShotPuts).toFixed(2) : 0) },
-          discus: { total: distances.totalDistanceDiscusThrown, average: (eventCounts.totalDiscusThrows > 0 ? (distances.totalDistanceDiscusThrown / eventCounts.totalDiscusThrows).toFixed(2) : 0) },
-          javelin: { total: distances.totalDistanceJavelinThrown, average: (eventCounts.totalJavelinThrows > 0 ? (distances.totalDistanceJavelinThrown / eventCounts.totalJavelinThrows).toFixed(2) : 0) },
-          hammerThrow: { total: distances.totalDistanceHammerThrown, average: (eventCounts.totalHammerThrows > 0 ? (distances.totalDistanceHammerThrown / eventCounts.totalHammerThrows).toFixed(2) : 0) }
-        };
-
-        setFieldEventStats(formattedStats);
-
-        const competitionsResponse = await axios.get('http://192.168.100.71:3000/api/competitions/athlete/1');
-        const competitions = competitionsResponse.data;
-        setUpcomingEvents(competitions.filter(competition => new Date(competition.CompetitionDate) > new Date()));
-
-        const trainingSessionsResponse = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
-        const trainingSessions = trainingSessionsResponse.data;
-
-        const groupedByWeek = trainingSessions.reduce((acc, session) => {
-          const date = moment(session.SessionDate);
-          const weekStart = date.startOf('week').format('YYYY-MM-DD');
-          if (!acc[weekStart]) acc[weekStart] = [];
-          acc[weekStart].push(session.IntensityPercentage);
-          return acc;
-        }, {});
-
-        const labels = Object.keys(groupedByWeek);
-        const data = labels.map(date => {
-          const percentages = groupedByWeek[date];
-          const avgIntensity = percentages.length > 0 ? (percentages.reduce((a, b) => a + b) / percentages.length).toFixed(2) : 0;
-          return parseFloat(avgIntensity);
-        });
-
-        setIntensityData({
-          labels,
-          datasets: [{ data }]
-        });
-
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const distanceInKilometers = totalDistanceRan / 1000;
   const timeInMinutes = totalTimeRan / 60;
@@ -121,11 +129,14 @@ const DashboardScreen = ({ navigation }) => {
     );
   }
 
-  const renderEventItem = ({ item }) => (
-    <Text style={styles.eventItem}>
-      {item.CompetitionName} - {new Date(item.CompetitionDate).toDateString()}
-    </Text>
-  );
+  const renderEventItem = ({ item }) => {
+    const formattedDate = moment(item.CompetitionDate).format('ddd MMMM D, YYYY');
+    return (
+      <Text style={styles.eventItem}>
+        {item.CompetitionName} - {formattedDate}
+      </Text>
+    );
+  };
 
   return (
     <View style={styles.container}>
