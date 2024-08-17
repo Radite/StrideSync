@@ -61,44 +61,50 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
         </View>
         
         {/* Event Details */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Event Details</Text>
-          <View style={styles.eventList}>
-            {EventDetails.map((event, index) => (
-              <View key={index} style={styles.eventCard}>
-                <Text style={styles.eventTitle}>Event: {event.Event} meters</Text>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Reps:</Text>
-                  <Text style={styles.eventValue}>{event.Reps}</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Marks:</Text>
-                  <Text style={styles.eventValue}>{event.Marks.map(mark => mark.Mark).join(', ')}</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Total Distance:</Text>
-                  <Text style={styles.eventValue}>{event.TotalDistance} meters</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Total Time:</Text>
-                  <Text style={styles.eventValue}>{event.TotalTime} seconds</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Grass:</Text>
-                  <Text style={styles.eventValue}>{event.grass ? 'Yes' : 'No'}</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Spikes:</Text>
-                  <Text style={styles.eventValue}>{event.spikes ? 'Yes' : 'No'}</Text>
-                </View>
-                <View style={styles.eventRow}>
-                  <Text style={styles.eventLabel}>Sled:</Text>
-                  <Text style={styles.eventValue}>{event.sled ? 'Yes' : 'No'}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
+        <Text style={styles.sectionTitle}>Event Details</Text>
+        <View style={styles.eventList}>
+  {EventDetails.map((event, index) => (
+    <View key={index} style={styles.eventCard}>
+      <Text style={styles.eventTitle}>
+        Event: {event.Event} {event.EventType === 'running' ? 'meters' : ''}
+      </Text>
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Reps:</Text>
+        <Text style={styles.eventValue}>{event.Reps}</Text>
+      </View>
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Marks:</Text>
+        <Text style={styles.eventValue}>
+          {event.Marks.map(mark => `${parseFloat(mark.Mark).toFixed(2)}${event.EventType === 'running' ? 's' : 'm'}`).join(', ')}
+        </Text>
+      </View>
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Total Distance:</Text>
+        <Text style={styles.eventValue}>{parseFloat(event.TotalDistance).toFixed(2)}m</Text>
+      </View>
+      {/* Conditionally render Total Time */}
+      {event.EventType === 'running' && (
+        <View style={styles.eventRow}>
+          <Text style={styles.eventLabel}>Total Time:</Text>
+          <Text style={styles.eventValue}>{parseFloat(event.TotalTime).toFixed(2)}s</Text>
         </View>
+      )}
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Grass:</Text>
+        <Text style={styles.eventValue}>{event.grass ? 'Yes' : 'No'}</Text>
+      </View>
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Spikes:</Text>
+        <Text style={styles.eventValue}>{event.spikes ? 'Yes' : 'No'}</Text>
+      </View>
+      <View style={styles.eventRow}>
+        <Text style={styles.eventLabel}>Sled:</Text>
+        <Text style={styles.eventValue}>{event.sled ? 'Yes' : 'No'}</Text>
+      </View>
+    </View>
+  ))}
+</View>
+
 
         {/* Notes */}
         <View style={styles.section}>
@@ -156,6 +162,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 25,
+    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 22,
