@@ -164,28 +164,28 @@ const EventDetails = trainingLogs.map(log => ({
     .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for running events
 
   // Calculate TotalDistanceLongJumped
-  const TotalDistanceLongJumped = calculateTotalDistance(EventDetails, 'long_jump');
+  const TotalDistanceLongJumped = calculateTotalDistance(EventDetails, 'Long Jump');
 
   // Calculate TotalDistanceHighJumped
-  const TotalDistanceHighJumped = calculateTotalDistance(EventDetails, 'high_jump');
+  const TotalDistanceHighJumped = calculateTotalDistance(EventDetails, 'High Jump');
 
   // Calculate TotalDistancePoleVaulted
-  const TotalDistancePoleVaulted = calculateTotalDistance(EventDetails, 'pole_vault');
+  const TotalDistancePoleVaulted = calculateTotalDistance(EventDetails, 'Pole Vault');
 
   // Calculate TotalDistanceShotPut
-  const TotalDistanceShotPut = calculateTotalDistance(EventDetails, 'shot_put');
+  const TotalDistanceShotPut = calculateTotalDistance(EventDetails, 'Shot Put');
 
   // Calculate TotalDistanceDiscusThrown
-  const TotalDistanceDiscusThrown = calculateTotalDistance(EventDetails, 'discus');
+  const TotalDistanceDiscusThrown = calculateTotalDistance(EventDetails, 'Discus');
 
   // Calculate TotalDistanceJavelinThrown
-  const TotalDistanceJavelinThrown = calculateTotalDistance(EventDetails, 'javelin');
+  const TotalDistanceJavelinThrown = calculateTotalDistance(EventDetails, 'Javelin');
 
   // Calculate TotalDistanceHammerThrown
-  const TotalDistanceHammerThrown = calculateTotalDistance(EventDetails, 'hammer');
+  const TotalDistanceHammerThrown = calculateTotalDistance(EventDetails, 'Hammer Throw');
 
   // Calculate TotalDistanceTripleJumped
-  const TotalDistanceTripleJumped = calculateTotalDistance(EventDetails, 'triple_jump');
+  const TotalDistanceTripleJumped = calculateTotalDistance(EventDetails, 'Triple Jump');
 
   // General function to calculate the total number of repetitions for a given sub-event
   const calculateTotalReps = (logs, subEventType) => 
@@ -194,14 +194,14 @@ const EventDetails = trainingLogs.map(log => ({
       .reduce((total, log) => total + (parseInt(log.reps, 10) || 0), 0);
 
   // Calculate the number of different events
-  const NumberOfLongJumps = calculateTotalReps(trainingLogs, 'long_jump');
-  const NumberOfHighJumps = calculateTotalReps(trainingLogs, 'high_jump');
-  const NumberOfPoleVaults = calculateTotalReps(trainingLogs, 'pole_vault');
-  const NumberOfShotPuts = calculateTotalReps(trainingLogs, 'shot_put');
-  const NumberOfDiscusThrows = calculateTotalReps(trainingLogs, 'discus');
-  const NumberOfJavelinThrows = calculateTotalReps(trainingLogs, 'javelin');
-  const NumberOfHammerThrows = calculateTotalReps(trainingLogs, 'hammer');
-  const NumberOfTripleJumps = calculateTotalReps(trainingLogs, 'triple_jump');
+  const NumberOfLongJumps = calculateTotalReps(trainingLogs, 'Long Jump');
+  const NumberOfHighJumps = calculateTotalReps(trainingLogs, 'High Jump');
+  const NumberOfPoleVaults = calculateTotalReps(trainingLogs, 'Pole Vault');
+  const NumberOfShotPuts = calculateTotalReps(trainingLogs, 'Shot Put');
+  const NumberOfDiscusThrows = calculateTotalReps(trainingLogs, 'Discus');
+  const NumberOfJavelinThrows = calculateTotalReps(trainingLogs, 'Javelin');
+  const NumberOfHammerThrows = calculateTotalReps(trainingLogs, 'Hammer Throw');
+  const NumberOfTripleJumps = calculateTotalReps(trainingLogs, 'Triple Jump');
     
   // Payload for training session details
   const trainingPayload = {
@@ -395,13 +395,13 @@ return (
                   value={log.subEvent}
                   onValueChange={(itemValue) => handleInputChange(index, 'subEvent', itemValue)}
                   items={[
-                    { label: 'Long Jump', value: 'long_jump' },
-                    { label: 'High Jump', value: 'high_jump' },
-                    { label: 'Pole Vault', value: 'pole_vault' },
-                    { label: 'Shot Put', value: 'shot_put' },
-                    { label: 'Discus', value: 'discus' },
-                    { label: 'Javelin', value: 'javelin' },
-                    { label: 'Triple Jump', value: 'triple_jump' },
+                    { label: 'Long Jump', value: 'Long Jump' },
+                    { label: 'High Jump', value: 'High Jump' },
+                    { label: 'Pole Vault', value: 'Pole Vault' },
+                    { label: 'Shot Put', value: 'Shot Put' },
+                    { label: 'Discus', value: 'Discus' },
+                    { label: 'Javelin', value: 'Javelin' },
+                    { label: 'Triple Jump', value: 'Triple Jump' },
                   ]}
                   placeholder={{ label: 'Select Field Event', value: '' }}
                   style={pickerSelectStyles}
