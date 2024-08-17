@@ -48,12 +48,13 @@
     "react-native-safe-area-context": "^4.10.8",
     "react-native-screens": "^3.34.0",
     "react-native-svg": "^15.5.0",
+    "react-native-svg-charts": "^5.4.0",
     "react-native-swipeable": "^0.6.0",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
     "typescript": "~5.3.3",
-    "victory-native": "^41.0.2"
+    "victory-native": "^41.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
