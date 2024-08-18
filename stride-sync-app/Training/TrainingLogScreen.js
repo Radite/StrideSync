@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 10,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   searchInput: {
     backgroundColor: '#1C1C1C',
