@@ -162,11 +162,11 @@ const DashboardScreen = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Performance Trends</Text>
-          <Text style={styles.chartTitle}>Average Intensity Over Time</Text>
+          <Text style={styles.chartTitle}>Average Training Intensity Over Time</Text>
           <LineChart
             data={intensityData}
             width={width + 20}
-            height={300}
+            height={350}
             chartConfig={{
               backgroundColor: '#1F1F1F',
               backgroundGradientFrom: '#1F1F1F',
@@ -216,13 +216,14 @@ const styles = StyleSheet.create({
   },
   cardsScrollView: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 50,
   },
   card: {
     width: width * 0.5,
     backgroundColor: '#1C1C1C',
     borderRadius: 12,
     padding: 15,
+    height: 120,
     marginHorizontal: 5,
     marginVertical: 10,
     borderColor: '#333',
@@ -234,12 +235,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#F0F0F0',
     fontFamily: 'Montserrat-SemiBold',
   },
   cardValue: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#E0E0E0',
   },
   section: {
