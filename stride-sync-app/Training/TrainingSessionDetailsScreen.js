@@ -11,6 +11,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
   const { sessionId } = route.params;
   const [sessionDetails, setSessionDetails] = useState(null);
 
+  
   useEffect(() => {
     // Fetch session details from the API
     axios.get(`http://192.168.100.71:3000/api/training-sessions/${sessionId}`)
@@ -64,12 +65,30 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
     SessionDate, SessionType, EventDetails, IntensityPercentage, Notes
   } = sessionDetails;
 
+  const formatTime = (seconds) => {
+    if (isNaN(seconds) || seconds < 0) {
+      return 'Invalid time';
+    }
+  
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = (seconds % 60).toFixed(2);
+  
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.padStart(5, '0')}`;
+    } else if (minutes > 0) {
+      return `${minutes}:${secs.padStart(5, '0')}`;
+    } else {
+      return secs.padStart(5, '0');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Training Session" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.sectionTitle}>Training Overview</Text>
-
+        
         {/* Card for Date, Type, and Intensity */}
         <View style={styles.detailsCard}>
           <View style={styles.detailItem}>
@@ -85,7 +104,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
             <Text style={styles.detailValue}>{IntensityPercentage}%</Text>
           </View>
         </View>
-
+        
         {/* Event Details */}
         <Text style={styles.sectionTitle}>Event Details</Text>
         <View style={styles.eventList}>
@@ -101,7 +120,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
               <View style={styles.eventRow}>
                 <Text style={styles.eventLabel}>Marks:</Text>
                 <Text style={styles.eventValue}>
-                  {event.Marks.map(mark => `${parseFloat(mark.Mark).toFixed(2)}${event.EventType === 'running' ? 's' : 'm'}`).join(', ')}
+                  {event.Marks.map(mark => formatTime(parseFloat(mark.Mark))).join(', ')}
                 </Text>
               </View>
               <View style={styles.eventRow}>
@@ -112,7 +131,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
               {event.EventType === 'running' && (
                 <View style={styles.eventRow}>
                   <Text style={styles.eventLabel}>Total Time:</Text>
-                  <Text style={styles.eventValue}>{parseFloat(event.TotalTime).toFixed(2)}s</Text>
+                  <Text style={styles.eventValue}>{formatTime(parseFloat(event.TotalTime))}</Text>
                 </View>
               )}
               <View style={styles.eventRow}>
@@ -130,7 +149,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
             </View>
           ))}
         </View>
-
+        
         {/* Notes */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notes</Text>
@@ -138,7 +157,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
             <Text style={styles.cardValue}>{Notes}</Text>
           </View>
         </View>
-
+        
         {/* Delete Button */}
         <View style={styles.deleteButtonContainer}>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
@@ -150,7 +169,6 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
