@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useCallback  } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dimensions, View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import Footer from '../Footer'; 
 import Header from '../Header'; 
 import { format, startOfWeek, endOfWeek, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios'; // Make sure axios is installed
 import { useFocusEffect } from '@react-navigation/native';
+import { RFValue } from 'react-native-responsive-fontsize';
+const { width, height } = Dimensions.get('window');
 
 const TrainingLogScreen = ({ navigation }) => {
+  // Access dimensions directly
+
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('this_week');
   const [filteredData, setFilteredData] = useState([]);
@@ -406,7 +410,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0A0A',
   },
   scrollContent: {
-    paddingHorizontal: 10,
+    paddingHorizontal: width * 0.001,  // Responsive horizontal padding
     paddingBottom: 10,
     marginTop: 10,
   },
@@ -425,28 +429,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 2,
-    width: 300,
-    height: 115,
+    width: width * 0.8,  // Responsive width
+    height: 155,
   },
   summaryCardTitle: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     color: '#FFB74D',
     fontFamily: 'Montserrat-Bold',
     marginBottom: 10,
   },
   summaryCardDistance: {
-    fontSize: 16,
+    fontSize: RFValue(16),
     color: '#E0E0E0',
     fontFamily: 'Montserrat-Regular',
     marginBottom: 5,
   },
   summaryCardTime: {
-    fontSize: 14,
+    fontSize: RFValue(14),
     color: '#E0E0E0',
     fontFamily: 'Montserrat-Regular',
   },
   summaryContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: width * 0.03,  // Responsive horizontal padding
     marginBottom: 20,
     backgroundColor: '#1C1C1C',
     padding: 15,
@@ -461,7 +465,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   summaryTitle: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     color: '#FFB74D',
     fontFamily: 'Montserrat-Bold',
     marginBottom: 10,
@@ -472,17 +476,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   summaryLabel: {
-    fontSize: 16,
+    fontSize: RFValue(16),
     color: '#E0E0E0',
     fontFamily: 'Montserrat-Regular',
   },
   summaryValue: {
-    fontSize: 16,
+    fontSize: RFValue(16),
     color: '#FFB74D',
     fontFamily: 'Montserrat-Bold',
   },
   filterContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: width * 0.003,  // Responsive horizontal padding
     marginBottom: 20,
     marginTop: 10,
   },
@@ -490,7 +494,7 @@ const styles = StyleSheet.create({
     color: '#F0F0F0',
     marginBottom: 10,
     fontFamily: 'Montserrat-SemiBold',
-    fontSize: 16,
+    fontSize: RFValue(16),
   },
   filterDropdown: {
     flexDirection: 'row',
@@ -509,12 +513,12 @@ const styles = StyleSheet.create({
   },
   filterText: {
     color: '#E0E0E0',
-    fontSize: 16,
+    fontSize: RFValue(16),
     fontFamily: 'Montserrat-Regular',
   },
   arrow: {
     color: '#E0E0E0',
-    fontSize: 16,
+    fontSize: RFValue(16),
   },
   quickLinksContainer: {
     flexDirection: 'row',
@@ -536,7 +540,7 @@ const styles = StyleSheet.create({
   },
   quickLinkText: {
     color: '#E0E0E0',
-    fontSize: 14,
+    fontSize: RFValue(13),
     fontFamily: 'Montserrat-Regular',
   },
   calendarContainer: {
@@ -568,11 +572,11 @@ const styles = StyleSheet.create({
   },
   doneButtonText: {
     color: '#0A0A0A',
-    fontSize: 16,
+    fontSize: RFValue(16),
     fontFamily: 'Montserrat-Bold',
   },
   searchContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: width * 0.03,  // Responsive horizontal padding
     marginTop: 10,
     marginBottom: 20,
   },
@@ -582,7 +586,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 15,
     height: 45,
-    fontSize: 16,
+    fontSize: RFValue(16),
     borderColor: '#333',
     borderWidth: 1,
     shadowColor: '#000',
@@ -591,9 +595,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  content: {
-    paddingBottom: 150,
-  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -601,7 +602,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: RFValue(22),
     fontFamily: 'Montserrat-Bold',
     color: '#FFB74D',
   },
@@ -619,7 +620,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   logButtonText: {
-    fontSize: 22,
+    fontSize: RFValue(22),
     color: '#0A0A0A',
     fontFamily: 'Montserrat-Bold',
   },
@@ -637,13 +638,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sessionDate: {
-    fontSize: 16,
+    fontSize: RFValue(16),
     color: '#FFB74D',
     marginBottom: 5,
     fontFamily: 'Montserrat-SemiBold',
   },
   sessionDetail: {
-    fontSize: 14,
+    fontSize: RFValue(14),
     color: '#E0E0E0',
     marginBottom: 2,
     fontFamily: 'Montserrat-Regular',
@@ -671,10 +672,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   aiButtonText: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     color: '#0A0A0A',
     fontFamily: 'Montserrat-Bold',
   },
 });
-
 export default TrainingLogScreen;
