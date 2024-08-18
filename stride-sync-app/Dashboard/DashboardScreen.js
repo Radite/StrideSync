@@ -38,7 +38,6 @@ const DashboardScreen = ({ navigation }) => {
   });
   const [totalDistanceRan, setTotalDistanceRan] = useState(0);
   const [totalTimeRan, setTotalTimeRan] = useState(0);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [intensityData, setIntensityData] = useState({ labels: [], datasets: [] });
   const [dailyQuote, setDailyQuote] = useState(getDailyQuote());
 
@@ -67,7 +66,6 @@ const DashboardScreen = ({ navigation }) => {
   
       const competitionsResponse = await axios.get('http://192.168.100.71:3000/api/competitions/athlete/1');
       const competitions = competitionsResponse.data;
-      setUpcomingEvents(competitions.filter(competition => new Date(competition.CompetitionDate) > new Date()));
   
       const trainingSessionsResponse = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
       const trainingSessions = trainingSessionsResponse.data;
@@ -161,16 +159,7 @@ const DashboardScreen = ({ navigation }) => {
           })}
         </ScrollView>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Upcoming Events</Text>
-          <FlatList
-            data={upcomingEvents}
-            renderItem={renderEventItem}
-            keyExtractor={item => item.CompetitionID.toString()}
-            contentContainerStyle={styles.eventList}
-            ListEmptyComponent={<Text style={styles.eventItem}>No upcoming events</Text>}
-          />
-        </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Performance Trends</Text>
           <Text style={styles.chartTitle}>Average Intensity Over Time</Text>
