@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 20,
     marginTop: 10,
   },
   detailsCard: {

@@ -88,15 +88,6 @@ const LogTraining = ({ navigation }) => {
 
     setTrainingLogs(newLogs);
   };
-
-  const handleMarkChange = (logIndex, markIndex, value) => {
-    const updatedLogs = [...trainingLogs];
-    if (!updatedLogs[logIndex].marks) {
-      updatedLogs[logIndex].marks = [];
-    }
-    updatedLogs[logIndex].marks[markIndex] = value;
-    setTrainingLogs(updatedLogs);
-  };
   
   const addAnotherEntry = () => {
     const newEntry = { 
@@ -121,48 +112,51 @@ const LogTraining = ({ navigation }) => {
 
   const handleSubmit = () => {
     if (validateFields()) {
-
-    const formattedDate = format(date, 'yyyy-MM-dd');
-    console.log('Formatted Date:', formattedDate);
-    console.log('Training Type:', trainingType);
-    console.log('Notes:', notes);
-// Process training logs to calculate event details
-const EventDetails = trainingLogs.map(log => ({
-  EventType: log.eventType,
-  Event: log.eventType === 'running' 
-    ? convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
-    : log.subEvent,
-  Reps: log.reps,
-  Marks: log.marks.map(mark => ({ Mark: mark })),
-  TotalDistance: log.eventType === 'running'
-    ? log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
-    : log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0), // Sum of marks for field events
-  ...(log.eventType === 'running' 
-    ? { TotalTime: log.marks.reduce((sum, mark) => sum + (parseFloat(mark) || 0), 0) }
-    : { TotalReps: log.reps }), // Add TotalReps only if not running
-    sled: log.sled || false,  // Default to false if not set
-    grass: log.grass || false,  // Default to false if not set
-    spikes: log.spikes || false,  // Default to false if not set
-  }));
-
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      console.log('Formatted Date:', formattedDate);
+      console.log('Training Type:', trainingType);
+      console.log('Notes:', notes);
+  
+      // Process training logs to calculate event details
+      const EventDetails = trainingLogs.map(log => ({
+        EventType: log.eventType,
+        Event: log.eventType === 'running' 
+          ? convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+          : log.subEvent,
+        Reps: log.reps,
+        Marks: log.marks.map(mark => {
+          const totalSeconds = convertToSeconds(mark.hours, mark.minutes, mark.seconds);
+          return { Mark: totalSeconds.toFixed(2) }; // Format Mark with two decimal places
+        }),
+        TotalDistance: log.eventType === 'running'
+          ? log.reps * convertToMeters(parseFloat(log.distance) || 0, log.distanceUnit)
+          : log.marks.reduce((sum, mark) => sum + convertToSeconds(mark.hours, mark.minutes, mark.seconds), 0), // Sum of marks for field events
+        ...(log.eventType === 'running' 
+          ? { TotalTime: log.marks.reduce((sum, mark) => sum + convertToSeconds(mark.hours, mark.minutes, mark.seconds), 0) }
+          : { TotalReps: log.reps }), // Add TotalReps only if not running
+        sled: log.sled || false,  // Default to false if not set
+        grass: log.grass || false,  // Default to false if not set
+        spikes: log.spikes || false,  // Default to false if not set
+      }));
+      
       console.log(trainingLogs);
-
-
-  // General function to calculate total distance for a given event
-  const calculateTotalDistance = (events, eventType) => 
-    events
-      .filter(detail => detail.Event === eventType)
-      .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
-
-  // Calculate TotalDistanceRan
-  const TotalDistanceRan = EventDetails
-    .filter(detail => detail.EventType === 'running')
-    .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
-
-    const TotalTimeRan = EventDetails
-    .filter(detail => detail.EventType === 'running')  // Filter for running events
-    .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for running events
-
+  
+      // General function to calculate total distance for a given event
+      const calculateTotalDistance = (events, eventType) => 
+        events
+          .filter(detail => detail.Event === eventType)
+          .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
+  
+      // Calculate TotalDistanceRan
+      const TotalDistanceRan = EventDetails
+        .filter(detail => detail.EventType === 'running')
+        .reduce((total, detail) => total + (parseFloat(detail.TotalDistance) || 0), 0);
+  
+      // Calculate TotalTimeRan
+      const TotalTimeRan = EventDetails
+        .filter(detail => detail.EventType === 'running')  // Filter for running events
+        .reduce((total, detail) => total + detail.TotalTime, 0); // Sum TotalTime for running events
+  
   // Calculate TotalDistanceLongJumped
   const TotalDistanceLongJumped = calculateTotalDistance(EventDetails, 'Long Jump');
 
@@ -322,6 +316,35 @@ const removeEntry = (index) => {
   setTrainingLogs((prevLogs) => prevLogs.filter((_, i) => i !== index));
 };
 
+const convertToSeconds = (hours, minutes, seconds) => {
+  return (parseInt(hours, 10) || 0) * 3600
+       + (parseInt(minutes, 10) || 0) * 60
+       + parseFloat(seconds) || 0; // Use parseFloat for fractional seconds
+};
+
+
+const handleMarkChange = (logIndex, markIndex, value, type) => {
+  const updatedLogs = [...trainingLogs];
+
+  // Ensure the 'marks' array exists
+  if (!updatedLogs[logIndex].marks) {
+    updatedLogs[logIndex].marks = [];
+  }
+
+  // Ensure the specific mark entry exists
+  if (!updatedLogs[logIndex].marks[markIndex]) {
+    updatedLogs[logIndex].marks[markIndex] = { hours: '', minutes: '', seconds: '' };
+  }
+
+  // Update the appropriate time unit
+  updatedLogs[logIndex].marks[markIndex][type] = value;
+
+  // Save the updated logs with hours, minutes, and seconds intact
+  setTrainingLogs(updatedLogs);
+};
+
+
+
 return (
   <View style={styles.container}>
     <Header title="Log Training Sessions" navigation={navigation} />
@@ -422,16 +445,16 @@ return (
 
               {/* Marks for Each Rep */}
               {log.reps && Array.from({ length: log.reps }).map((_, repIndex) => (
-  <View key={repIndex} style={styles.inputGroup}>
-    <Text style={styles.label}>Mark {repIndex + 1}</Text>
-    <TextInput
-      style={styles.input}
-      placeholder={`Mark ${repIndex + 1}`}
-      value={log.marks[repIndex] || ''}
-      onChangeText={(value) => handleMarkChange(index, repIndex, value)}
-    />
-  </View>
-))}
+                <View key={repIndex} style={styles.inputGroup}>
+                  <Text style={styles.label}>Mark {repIndex + 1}</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={`Mark ${repIndex + 1}`}
+                    value={log.marks[repIndex] || ''}
+                    onChangeText={(value) => handleMarkChange(index, repIndex, value)}
+                  />
+                </View>
+              ))}
 
             </>
           )}
@@ -515,14 +538,36 @@ return (
                 </View>
               </View>
 
-              {log.marks.map((mark, markIndex) => (
-                <View key={markIndex} style={styles.inputGroup}>
+              {/* Marks input for running, with hh:mm:ss format */}
+              {log.reps && Array.from({ length: log.reps }).map((_, markIndex) => (
+                <View key={markIndex} style={[styles.inputGroup, { flexDirection: 'row', justifyContent: 'space-between' }]}>
                   <Text style={styles.label}>Mark {markIndex + 1}</Text>
+                  
+                  {/* Hours input */}
                   <TextInput
-                    style={styles.input}
-                    placeholder={`Mark ${markIndex + 1}`}
-                    value={mark}
-                    onChangeText={(value) => handleMarkChange(index, markIndex, value)}
+                    style={[styles.input, { flex: 1, marginRight: 5 }]}
+                    placeholder="hh"
+                    keyboardType="numeric"
+                    value={log.marks[markIndex]?.hours || ''}
+                    onChangeText={(value) => handleMarkChange(index, markIndex, value, 'hours')}
+                  />
+                  
+                  {/* Minutes input */}
+                  <TextInput
+                    style={[styles.input, { flex: 1, marginRight: 5 }]}
+                    placeholder="mm"
+                    keyboardType="numeric"
+                    value={log.marks[markIndex]?.minutes || ''}
+                    onChangeText={(value) => handleMarkChange(index, markIndex, value, 'minutes')}
+                  />
+                  
+                  {/* Seconds input */}
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="ss"
+                    keyboardType="numeric"
+                    value={log.marks[markIndex]?.seconds || ''}
+                    onChangeText={(value) => handleMarkChange(index, markIndex, value, 'seconds')}
                   />
                 </View>
               ))}
