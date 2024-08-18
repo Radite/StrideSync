@@ -1,15 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, FlatList, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { format } from 'date-fns';
+import { format, isBefore, startOfDay } from 'date-fns';
+import RNPickerSelect from 'react-native-picker-select';
 import Footer from '../Footer';
 import Header from '../Header';
 
 const eventOptions = [
-  '60m', '100m', '200m', '400m', '800m', '1500m', '3000m', '3000m Steeplechase', '5000m', '10000m', 
-  'Marathon', 'Half Marathon', 'Long Jump', 'High Jump', 'Pole Vault', 'Shot Put', 'Javelin', 
-  'Discus', 'Hammer Throw'
+  { label: '60m', value: '60m' },
+  { label: '100m', value: '100m' },
+  { label: '200m', value: '200m' },
+  { label: '400m', value: '400m' },
+  { label: '800m', value: '800m' },
+  { label: '1500m', value: '1500m' },
+  { label: '3000m', value: '3000m' },
+  { label: '3000m Steeplechase', value: '3000m Steeplechase' },
+  { label: '5000m', value: '5000m' },
+  { label: '10000m', value: '10000m' },
+  { label: 'Marathon', value: 'Marathon' },
+  { label: 'Half Marathon', value: 'Half Marathon' },
+  { label: 'Long Jump', value: 'Long Jump' },
+  { label: 'High Jump', value: 'High Jump' },
+  { label: 'Pole Vault', value: 'Pole Vault' },
+  { label: 'Shot Put', value: 'Shot Put' },
+  { label: 'Javelin', value: 'Javelin' },
+  { label: 'Discus', value: 'Discus' },
+  { label: 'Hammer Throw', value: 'Hammer Throw' }
 ];
+
+const convertTimeToSeconds = (time) => {
+  const timeRegex = /^((\d+):)?(\d+):(\d+)(\.(\d+))?$/;
+  const matches = time.match(timeRegex);
+
+  if (!matches) return 0;
+
+  const hours = parseInt(matches[2] || '0', 10);
+  const minutes = parseInt(matches[3], 10);
+  const seconds = parseInt(matches[4], 10);
+  const milliseconds = parseInt((matches[6] || '0').substring(0, 2), 10);
+
+  return hours * 3600 + minutes * 60 + seconds + milliseconds / 100;
+};
 
 const LogCompetitionScreen = ({ navigation }) => {
   const [competitionName, setCompetitionName] = useState('');
@@ -20,10 +51,20 @@ const LogCompetitionScreen = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
 
+  // Get today's date
+  const today = startOfDay(new Date());
+
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || competitionDate;
+
+    // Ensure the selected date is not beyond today's date
+    if (isBefore(currentDate, today)) {
+      setCompetitionDate(currentDate);
+    } else {
+      Alert.alert('Error', 'Date cannot be in the future.');
+    }
+
     setShowDatePicker(false);
-    setCompetitionDate(currentDate);
   };
 
   const handleAddEvent = () => {
@@ -43,14 +84,14 @@ const LogCompetitionScreen = ({ navigation }) => {
 
   const handleSubmit = () => {
     if (competitionName && events.every(e => e.event && e.mark && e.position)) {
-      // Prepare data for submission
+      // Convert marks to seconds
       const competitionData = {
         AthleteID: 1, // Replace with actual athlete ID if needed
         CompetitionName: competitionName,
         CompetitionDate: format(competitionDate, 'yyyy-MM-dd'),
         EventResults: events.map(e => ({
           Event: e.event,
-          Mark: e.mark,
+          Mark: convertTimeToSeconds(e.mark), // Convert mark to seconds
           Position: e.position,
         })),
         Notes: notes,
@@ -86,19 +127,6 @@ const LogCompetitionScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please fill out all fields.');
     }
   };
-  
-
-  const openModal = (index) => {
-    setSelectedEventIndex(index);
-    setModalVisible(true);
-  };
-
-  const selectEvent = (event) => {
-    const newEvents = [...events];
-    newEvents[selectedEventIndex].event = event;
-    setEvents(newEvents);
-    setModalVisible(false);
-  };
 
   return (
     <View style={styles.container}>
@@ -126,6 +154,7 @@ const LogCompetitionScreen = ({ navigation }) => {
               value={competitionDate}
               mode="date"
               display="default"
+              maximumDate={today} // Restrict date picker to today or earlier
               onChange={handleDateChange}
             />
           )}
@@ -136,9 +165,13 @@ const LogCompetitionScreen = ({ navigation }) => {
             <View style={styles.row}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Event</Text>
-                <TouchableOpacity onPress={() => openModal(index)} style={styles.pickerButton}>
-                  <Text style={styles.pickerButtonText}>{event.event || 'Select Event'}</Text>
-                </TouchableOpacity>
+                <RNPickerSelect
+                  placeholder={{ label: 'Select Event', value: '' }}
+                  items={eventOptions}
+                  onValueChange={(value) => handleEventChange(index, 'event', value)}
+                  value={event.event}
+                  style={pickerSelectStyles}
+                />
               </View>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Mark</Text>
@@ -189,28 +222,6 @@ const LogCompetitionScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Save Competition</Text>
         </TouchableOpacity>
-
-        {/* Modal for event selection */}
-        <Modal
-          visible={isModalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <FlatList
-                data={eventOptions}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <Pressable style={styles.modalItem} onPress={() => selectEvent(item)}>
-                    <Text style={styles.modalItemText}>{item}</Text>
-                  </Pressable>
-                )}
-              />
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
 
       <Footer navigation={navigation} />
@@ -222,7 +233,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
-    justifyContent: 'space-between', // Ensures that Footer is pushed to the bottom
+    justifyContent: 'space-between',
   },
   scrollContent: {
     padding: 20,
@@ -290,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFB74D',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 70, // Adjust as needed to ensure spacing from Footer
+    marginBottom: 70,
     alignItems: 'center',
   },
   submitButtonText: {
@@ -311,42 +322,51 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
   },
   deleteButton: {
-    width: 25, // Adjust size as needed
-    height: 25, // Adjust size as needed
-    borderRadius: 15, // This makes the button circular
-    backgroundColor: 'orange', // Fill color
+    width: 25,
+    height: 25,
+    borderRadius: 15,
+    backgroundColor: 'orange',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute', // Positioning can be adjusted based on where you want the button
-    top: 5, // Adjust as necessary
-    right: 5, // Adjust as necessary
+    position: 'absolute',
+    top: 5,
+    right: 5,
   },
   deleteButtonText: {
-    color: 'white', // Text color
-    fontSize: 14, // Font size for "X"
-    fontWeight: 'bold', // Make the "X" bold
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-    maxHeight: '50%',
-  },
-  modalItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  modalItemText: {
-    fontSize: 18,
+  pickerSelectStyles: {
+    inputIOS: {
+      color: '#ffffff',
+      padding: 10,
+      borderRadius: 5,
+      backgroundColor: '#2A2A2A',
+    },
+    inputAndroid: {
+      color: '#ffffff',
+      padding: 10,
+      borderRadius: 5,
+      backgroundColor: '#2A2A2A',
+    },
+    placeholder: {
+      color: '#888',
+    },
   },
 });
-
+const pickerSelectStyles = {
+  inputIOS: {
+    color: '#ffffff',
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#2A2A2A',
+  },
+  inputAndroid: {
+    color: '#ffffff',
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#2A2A2A',
+  },
+};
 export default LogCompetitionScreen;
