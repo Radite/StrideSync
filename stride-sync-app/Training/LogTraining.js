@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RNPickerSelect from 'react-native-picker-select';
-import { format } from 'date-fns';
+import { format, isBefore, startOfDay } from 'date-fns';
 import Header from '../Header'; // Adjust the import path as needed
 import Footer from '../Footer'; // Adjust the import path as needed
 import { Platform } from 'react-native';
 
 const LogTraining = ({ navigation }) => {
+  const today = startOfDay(new Date());
   const [trainingType, setTrainingType] = useState('');
   const [trainingLogs, setTrainingLogs] = useState([
     { 
@@ -383,6 +384,7 @@ return (
             value={date}
             mode="date"
             display="default"
+            maximumDate={today} // Restrict date picker to today or earlier
             onChange={handleDateChange}
           />
         )}
