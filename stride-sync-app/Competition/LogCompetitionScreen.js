@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, isBefore, startOfDay } from 'date-fns';
@@ -48,16 +48,28 @@ const LogCompetitionScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [events, setEvents] = useState([{ event: '', mark: '', position: '' }]);
   const [notes, setNotes] = useState('');
+  const [currentPBs, setCurrentPBs] = useState({});
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
 
   // Get today's date
   const today = startOfDay(new Date());
 
+  useEffect(() => {
+    // Fetch current PBs when component mounts
+    fetch('http://192.168.100.71:3000/api/athlete-profiles/1')
+      .then(response => response.json())
+      .then(data => {
+        setCurrentPBs(data.PersonalBests);
+      })
+      .catch(error => {
+        console.error('Error fetching personal bests:', error);
+      });
+  }, []);
+
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || competitionDate;
 
-    // Ensure the selected date is not beyond today's date
     if (isBefore(currentDate, today)) {
       setCompetitionDate(currentDate);
     } else {
@@ -85,6 +97,19 @@ const LogCompetitionScreen = ({ navigation }) => {
   const handleSubmit = () => {
     if (competitionName && events.every(e => e.event && e.mark && e.position)) {
       // Convert marks to seconds
+      const updatedPBs = { ...currentPBs };
+
+      events.forEach(e => {
+        if (e.event && e.mark) {
+          const markInSeconds = convertTimeToSeconds(e.mark);
+          const currentPB = parseFloat(updatedPBs[e.event]) || Infinity;
+
+          if (markInSeconds < currentPB) {
+            updatedPBs[e.event] = e.mark;
+          }
+        }
+      });
+
       const competitionData = {
         AthleteID: 1, // Replace with actual athlete ID if needed
         CompetitionName: competitionName,
@@ -96,8 +121,8 @@ const LogCompetitionScreen = ({ navigation }) => {
         })),
         Notes: notes,
       };
-  
-      // Make API request to save competition data
+
+      // Send the competition data
       fetch('http://192.168.100.71:3000/api/competitions', {
         method: 'POST',
         headers: {
@@ -108,22 +133,43 @@ const LogCompetitionScreen = ({ navigation }) => {
         .then(response => response.json())
         .then(data => {
           if (data.CompetitionID) {
-            // If successful, log success and navigate back
+            // If competition data is saved successfully, update the profile
             console.log('Success: Competition data saved successfully.', data);
-            navigation.navigate('CompetitionLog');
+            
+            // Update athlete profile with new PBs
+            fetch('http://192.168.100.71:3000/api/athlete-profiles/1', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                PersonalBests: updatedPBs,
+              }),
+            })
+              .then(response => response.json())
+              .then(profileData => {
+                if (profileData) {
+                  console.log('Success: Athlete profile updated successfully.', profileData);
+                  navigation.navigate('CompetitionLog');
+                } else {
+                  console.error('Failed to update athlete profile:', profileData);
+                  Alert.alert('Error', 'Failed to update athlete profile.');
+                }
+              })
+              .catch(error => {
+                console.error('Error updating athlete profile:', error);
+                Alert.alert('Error', 'An error occurred while updating athlete profile.');
+              });
           } else {
-            // Log failure response and alert user
             console.error('Failed to save competition data:', data);
             Alert.alert('Error', 'Failed to save competition data.');
           }
         })
         .catch(error => {
-          // Log error and alert user
           console.error('Error saving competition data:', error);
           Alert.alert('Error', 'An error occurred while saving competition data.');
         });
     } else {
-      // Alert user if validation fails
       Alert.alert('Error', 'Please fill out all fields.');
     }
   };
@@ -154,7 +200,7 @@ const LogCompetitionScreen = ({ navigation }) => {
               value={competitionDate}
               mode="date"
               display="default"
-              maximumDate={today} // Restrict date picker to today or earlier
+              maximumDate={today}
               onChange={handleDateChange}
             />
           )}

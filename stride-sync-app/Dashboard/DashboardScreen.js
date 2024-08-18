@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
 import Footer from '../Footer'; 
 import Header from '../Header'; 
 import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
 import moment from 'moment';
-import { useFocusEffect } from '@react-navigation/native'; // Import the useFocusEffect hook
+import { useFocusEffect } from '@react-navigation/native';
+import { RFValue } from "react-native-responsive-fontsize";
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 // Sample motivational quotes
 const quotes = [
@@ -64,33 +65,76 @@ const DashboardScreen = ({ navigation }) => {
   
       setFieldEventStats(formattedStats);
   
-      const competitionsResponse = await axios.get('http://192.168.100.71:3000/api/competitions/athlete/1');
-      const competitions = competitionsResponse.data;
-  
       const trainingSessionsResponse = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
       const trainingSessions = trainingSessionsResponse.data;
   
-      const groupedByWeek = trainingSessions.reduce((acc, session) => {
-        const date = moment(session.SessionDate);
-        const weekStart = date.startOf('week').format('YYYY-MM-DD');
-        if (!acc[weekStart]) acc[weekStart] = [];
-        acc[weekStart].push(session.IntensityPercentage);
-        return acc;
-      }, {});
+// Current date
+const today = moment();
+// Start of the current week
+const startOfWeek = today.clone().startOf('week');
+// End of the current week (6 days after the start)
+const endOfWeek = startOfWeek.clone().add(6, 'days');
+// Start of the previous week
+const startOfLastWeek = startOfWeek.clone().subtract(1, 'week');
+// End of the previous week (the day before the start of the current week)
+const endOfLastWeek = startOfWeek.clone().subtract(1, 'day');
+
+// Arrays to hold sessions
+const currentWeekSessions = [];
+const lastWeekSessions = [];
+
+// Process training sessions
+trainingSessions.forEach(session => {
+    const sessionDate = moment(session.SessionDate);
+    if (sessionDate.isSameOrAfter(startOfWeek) && sessionDate.isSameOrBefore(endOfWeek)) {
+        currentWeekSessions.push(session);
+    } else if (sessionDate.isSameOrAfter(startOfLastWeek) && sessionDate.isSameOrBefore(endOfLastWeek)) {
+        lastWeekSessions.push(session);
+    }
+});
+
+// Log date ranges
+console.log('Date range for the current week:');
+console.log('Start:', startOfWeek.format('YYYY-MM-DD'));
+console.log('End:', endOfWeek.format('YYYY-MM-DD'));
+
+console.log('Date range for the last week:');
+console.log('Start:', startOfLastWeek.format('YYYY-MM-DD'));
+console.log('End:', endOfLastWeek.format('YYYY-MM-DD'));
+
+
+      const processWeeklyData = (sessions) => {
+        const weekData = Array(7).fill(0); // Array for 7 days, filled with 0
+        const sessionCounts = Array(7).fill(0); // Track the number of sessions for each day
+
+        sessions.forEach(session => {
+          const dayIndex = moment(session.SessionDate).day(); // 0 = Sunday, 6 = Saturday
+          weekData[dayIndex] += session.IntensityPercentage;
+          sessionCounts[dayIndex] += 1;
+        });
+
+        return weekData.map((totalIntensity, index) => {
+          return sessionCounts[index] > 0 ? (totalIntensity / sessionCounts[index]).toFixed(2) : 0;
+        });
+      };
   
-      // Sort labels by date
-      const labels = Object.keys(groupedByWeek).sort((a, b) => new Date(a) - new Date(b));
-      
-      // Map sorted labels to data
-      const data = labels.map(date => {
-        const percentages = groupedByWeek[date];
-        const avgIntensity = percentages.length > 0 ? (percentages.reduce((a, b) => a + b) / percentages.length).toFixed(2) : 0;
-        return parseFloat(avgIntensity);
-      });
+      const thisWeekData = processWeeklyData(currentWeekSessions);
+      const lastWeekData = processWeeklyData(lastWeekSessions);
   
       setIntensityData({
-        labels,
-        datasets: [{ data }]
+        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        datasets: [
+          {
+            data: lastWeekData.map(Number),
+            color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`, // Red line for last week
+            strokeWidth: 3
+          },
+          {
+            data: thisWeekData.map(Number),
+            color: (opacity = 1) => `rgba(54, 162, 235, ${opacity})`, // Blue line for this week
+            strokeWidth: 3
+          }
+        ]
       });
   
     } catch (err) {
@@ -100,7 +144,6 @@ const DashboardScreen = ({ navigation }) => {
     }
   };
   
-
   useFocusEffect(
     useCallback(() => {
       fetchData();
@@ -127,15 +170,6 @@ const DashboardScreen = ({ navigation }) => {
     );
   }
 
-  const renderEventItem = ({ item }) => {
-    const formattedDate = moment(item.CompetitionDate).format('ddd MMMM D, YYYY');
-    return (
-      <Text style={styles.eventItem}>
-        {item.CompetitionName} - {formattedDate}
-      </Text>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <Header title="Dashboard" navigation={navigation} />
@@ -158,7 +192,6 @@ const DashboardScreen = ({ navigation }) => {
             );
           })}
         </ScrollView>
-
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Performance Trends</Text>
@@ -195,6 +228,18 @@ const DashboardScreen = ({ navigation }) => {
             }}
             style={styles.chart}
           />
+
+          <View style={styles.legendContainer}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendColorBox, { backgroundColor: 'rgba(54, 162, 235, 1)' }]} />
+              <Text style={styles.legendLabel}>This Week</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendColorBox, { backgroundColor: 'rgba(255, 99, 132, 1)' }]} />
+              <Text style={styles.legendLabel}>Last Week</Text>
+            </View>
+          </View>
+
           <Text style={styles.quoteText}>{dailyQuote}</Text>
         </View>
       </ScrollView>
@@ -219,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   card: {
-    width: width * 0.5,
+    width: width * 0.6,
     backgroundColor: '#1C1C1C',
     borderRadius: 12,
     padding: 15,
@@ -235,19 +280,19 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: RFValue(16),
     color: '#F0F0F0',
     fontFamily: 'Montserrat-SemiBold',
   },
   cardValue: {
-    fontSize: 16,
+    fontSize: RFValue(14),
     color: '#E0E0E0',
   },
   section: {
     marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: RFValue(22),
     fontFamily: 'Montserrat-Bold',
     color: '#FFB74D',
     marginBottom: 15,
@@ -261,42 +306,45 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   quoteText: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     color: '#E0E0E0',
     marginTop: 30,
     textAlign: 'center',
     fontStyle: 'italic',
     paddingHorizontal: 15,
   },
-  eventList: {
-    backgroundColor: '#1C1C1C',
-    borderRadius: 12,
-    padding: 15,
-    borderColor: '#333',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  eventItem: {
-    fontSize: 16,
-    color: '#E0E0E0',
-    marginBottom: 10,
-  },
   errorText: {
     color: '#E0E0E0',
-    fontSize: 16,
+    fontSize: RFValue(16),
     textAlign: 'center',
     marginTop: 20,
   },
   chartTitle: {
-    fontSize: 18,
+    fontSize: RFValue(18),
     fontFamily: 'Montserrat-Bold',
     color: '#FFB74D',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  legendColorBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  legendLabel: {
+    fontSize: RFValue(16),
+    color: '#E0E0E0',
   },
 });
 
