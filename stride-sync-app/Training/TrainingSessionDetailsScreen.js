@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Dimensions, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { format } from 'date-fns';
-import Header from '../Header'; // Adjust the import path as needed
-import Footer from '../Footer'; // Adjust the import path as needed
+import Header from '../Header'; 
+import Footer from '../Footer';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +21,32 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
         console.error('Error fetching session details:', error);
       });
   }, [sessionId]);
+
+  const handleDelete = () => {
+    // Ask for confirmation before deleting
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this training session?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            axios.delete(`http://192.168.100.71:3000/api/training-sessions/${sessionId}`)
+              .then(() => {
+                // Redirect to the Training Log screen after deletion
+                navigation.navigate('TrainingLog');
+              })
+              .catch(error => {
+                console.error('Error deleting session:', error);
+                Alert.alert('Error', 'Failed to delete the session. Please try again.');
+              });
+          }
+        }
+      ]
+    );
+  };
 
   if (!sessionDetails) {
     return (
@@ -42,7 +68,7 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header title="Training Session" navigation={navigation} />
       <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Training Overview</Text>
+        <Text style={styles.sectionTitle}>Training Overview</Text>
 
         {/* Card for Date, Type, and Intensity */}
         <View style={styles.detailsCard}>
@@ -59,61 +85,66 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
             <Text style={styles.detailValue}>{IntensityPercentage}%</Text>
           </View>
         </View>
-        
+
         {/* Event Details */}
         <Text style={styles.sectionTitle}>Event Details</Text>
         <View style={styles.eventList}>
-  {EventDetails.map((event, index) => (
-    <View key={index} style={styles.eventCard}>
-      <Text style={styles.eventTitle}>
-        Event: {event.Event} {event.EventType === 'running' ? 'meters' : ''}
-      </Text>
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Reps:</Text>
-        <Text style={styles.eventValue}>{event.Reps}</Text>
-      </View>
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Marks:</Text>
-        <Text style={styles.eventValue}>
-          {event.Marks.map(mark => `${parseFloat(mark.Mark).toFixed(2)}${event.EventType === 'running' ? 's' : 'm'}`).join(', ')}
-        </Text>
-      </View>
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Total Distance:</Text>
-        <Text style={styles.eventValue}>{parseFloat(event.TotalDistance).toFixed(2)}m</Text>
-      </View>
-      {/* Conditionally render Total Time */}
-      {event.EventType === 'running' && (
-        <View style={styles.eventRow}>
-          <Text style={styles.eventLabel}>Total Time:</Text>
-          <Text style={styles.eventValue}>{parseFloat(event.TotalTime).toFixed(2)}s</Text>
+          {EventDetails.map((event, index) => (
+            <View key={index} style={styles.eventCard}>
+              <Text style={styles.eventTitle}>
+                Event: {event.Event} {event.EventType === 'running' ? 'meters' : ''}
+              </Text>
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Reps:</Text>
+                <Text style={styles.eventValue}>{event.Reps}</Text>
+              </View>
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Marks:</Text>
+                <Text style={styles.eventValue}>
+                  {event.Marks.map(mark => `${parseFloat(mark.Mark).toFixed(2)}${event.EventType === 'running' ? 's' : 'm'}`).join(', ')}
+                </Text>
+              </View>
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Total Distance:</Text>
+                <Text style={styles.eventValue}>{parseFloat(event.TotalDistance).toFixed(2)}m</Text>
+              </View>
+              {/* Conditionally render Total Time */}
+              {event.EventType === 'running' && (
+                <View style={styles.eventRow}>
+                  <Text style={styles.eventLabel}>Total Time:</Text>
+                  <Text style={styles.eventValue}>{parseFloat(event.TotalTime).toFixed(2)}s</Text>
+                </View>
+              )}
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Grass:</Text>
+                <Text style={styles.eventValue}>{event.grass ? 'Yes' : 'No'}</Text>
+              </View>
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Spikes:</Text>
+                <Text style={styles.eventValue}>{event.spikes ? 'Yes' : 'No'}</Text>
+              </View>
+              <View style={styles.eventRow}>
+                <Text style={styles.eventLabel}>Sled:</Text>
+                <Text style={styles.eventValue}>{event.sled ? 'Yes' : 'No'}</Text>
+              </View>
+            </View>
+          ))}
         </View>
-      )}
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Grass:</Text>
-        <Text style={styles.eventValue}>{event.grass ? 'Yes' : 'No'}</Text>
-      </View>
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Spikes:</Text>
-        <Text style={styles.eventValue}>{event.spikes ? 'Yes' : 'No'}</Text>
-      </View>
-      <View style={styles.eventRow}>
-        <Text style={styles.eventLabel}>Sled:</Text>
-        <Text style={styles.eventValue}>{event.sled ? 'Yes' : 'No'}</Text>
-      </View>
-    </View>
-  ))}
-</View>
-
 
         {/* Notes */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notes</Text>
           <View style={styles.card}>
-          <Text style={styles.cardValue}>{Notes}</Text>
+            <Text style={styles.cardValue}>{Notes}</Text>
           </View>
         </View>
 
+        {/* Delete Button */}
+        <View style={styles.deleteButtonContainer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete Session</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <Footer navigation={navigation} activeScreen="TrainingLog" />
     </SafeAreaView>
@@ -234,6 +265,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#F5F5F5', // Slightly lighter text for contrast
     marginTop: 8,
+  },
+  deleteButtonContainer: {
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30', // Bright red background for delete button
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
 
