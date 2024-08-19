@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { format } from 'date-fns';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -23,19 +23,20 @@ const getOrdinal = (number) => {
 
 // Function to determine the mark unit
 const getMarkUnit = (eventName) => {
-  // Check if event ends with "m" or contains certain keywords
   if (eventName.endsWith('m') || eventName.includes('steeplechase') || eventName.includes('marathon')) {
     return 's'; // Seconds for running events
   }
   return 'm'; // Meters for other events
 };
 
+// Get screen dimensions
+const { width, height } = Dimensions.get('window');
+
 const CompetitionDetailScreen = ({ route, navigation }) => {
   const { competition } = route.params;
   const sessionId = competition.CompetitionID;  // Extract session ID from competition
 
   const handleDelete = () => {
-    // Ask for confirmation before deleting
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this competition?",
@@ -47,7 +48,6 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
           onPress: () => {
             axios.delete(`http://192.168.100.71:3000/api/competitions/${sessionId}`)
               .then(() => {
-                // Redirect to the Training Log screen after deletion
                 navigation.navigate('TrainingLog');
               })
               .catch(error => {
@@ -85,10 +85,10 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{competition.CompetitionName}</Text>
         <Text style={styles.date}>{format(new Date(competition.CompetitionDate), 'MMM dd, yyyy')}</Text>
-        
-        {competition.Notes ? (
-          <Text style={styles.notes}>Notes: {competition.Notes}</Text>
-        ) : null}
+
+        <Text style={styles.isIndoor}>
+          {competition.IsIndoor ? 'Indoor Event' : 'Outdoor Event'}
+        </Text>
         
         <View style={styles.eventList}>
           {competition.EventResults.map((result, index) => (
@@ -108,7 +108,15 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
           ))}
         </View>
 
-        {/* Delete Button */}
+        {competition.Notes ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notes</Text>
+            <View style={styles.card}>
+              <Text style={styles.cardValue}>{competition.Notes}</Text>
+            </View>
+          </View>
+        ) : null}
+
         <View style={styles.deleteButtonContainer}>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Text style={styles.deleteButtonText}>Delete Competition</Text>
@@ -121,46 +129,45 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212',
   },
   content: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: width * 0.05, // 5% of screen width
+    paddingBottom: height * 0.1, // 10% of screen height
     marginTop: 10,
   },
   title: {
-    fontSize: 22,
+    fontSize: width * 0.055, // Responsive font size
     fontWeight: '700',
     color: '#FFC107',
     marginBottom: 10,
   },
   date: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: '#BBBBBB',
     marginBottom: 20,
   },
-  notes: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 20,
+  isIndoor: {
+    fontSize: width * 0.04,
+    color: '#fff',
+    marginVertical: 8,
   },
   eventList: {
     backgroundColor: '#1E1E1E',
     borderRadius: 12,
-    padding: 20,
+    padding: width * 0.05,
   },
   eventCard: {
     backgroundColor: '#2A2A2A',
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
+    padding: width * 0.04,
+    marginBottom: width * 0.04,
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: '600',
     color: '#FFC107',
     marginBottom: 10,
@@ -171,30 +178,63 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   eventLabel: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: '500',
     color: '#BBBBBB',
   },
   eventValue: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: '500',
     color: '#FFFFFF',
   },
   deleteButtonContainer: {
-    marginVertical: 20,
+    marginVertical: height * 0.02,
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF3B30', // Bright red background for delete button
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    backgroundColor: '#FF3B30',
+    paddingVertical: width * 0.03,
+    paddingHorizontal: width * 0.07,
     borderRadius: 8,
     alignItems: 'center',
   },
   deleteButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: '600',
+  },
+  section: {
+    marginBottom: height * 0.03,
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: width * 0.055,
+    fontWeight: '700',
+    color: '#FFC107',
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A2A2A',
+    paddingBottom: 8,
+  },
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    padding: width * 0.04,
+    marginBottom: width * 0.04,
+    borderColor: '#2A2A2A',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  cardValue: {
+    fontSize: width * 0.04,
+    color: '#F5F5F5',
+    marginTop: 8,
   },
 });
 
