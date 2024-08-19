@@ -67,7 +67,7 @@ const CompetitionLogScreen = ({ navigation }) => {
         const end = endOfMonth(subMonths(today, 1));
         withinDateRange = competitionDate >= start && competitionDate <= end;
       } else if (dateFilter === 'all_time') {
-        withinDateRange = competitionDate >= new Date('1999-12-31') && competitionDate <= today;
+        withinDateRange = true;
       } else if (dateFilter === 'custom_range') {
         withinDateRange = competitionDate >= new Date(startDate) && competitionDate <= new Date(endDate);
       }
@@ -128,9 +128,8 @@ const CompetitionLogScreen = ({ navigation }) => {
   };
 
   const setToday = () => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    setStartDate(today);
-    setEndDate(today);
+    setStartDate(format(new Date(), 'yyyy-MM-dd'));
+    setEndDate(format(new Date(), 'yyyy-MM-dd'));
     setDateFilter('today');
   };
 
@@ -155,8 +154,8 @@ const CompetitionLogScreen = ({ navigation }) => {
   };
 
   const setAllTime = () => {
-    setStartDate('1999-12-31');
-    setEndDate(format(new Date(), 'yyyy-MM-dd'));
+    setStartDate('');
+    setEndDate('');
     setDateFilter('all_time');
   };
 
@@ -168,6 +167,24 @@ const CompetitionLogScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error fetching competition details:', error);
       Alert.alert('Error', 'Failed to fetch competition details.');
+    }
+  };
+  
+  const formatTime = (seconds) => {
+    if (isNaN(seconds) || seconds < 0) {
+      return 'Invalid time';
+    }
+  
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = (seconds % 60).toFixed(2);
+  
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.padStart(5, '0')}`;
+    } else if (minutes > 0) {
+      return `${minutes}:${secs.padStart(5, '0')}`;
+    } else {
+      return secs.padStart(5, '0');
     }
   };
 
@@ -201,7 +218,7 @@ const CompetitionLogScreen = ({ navigation }) => {
             {dateFilter === 'custom_range'
               ? `${format(new Date(startDate), 'MMM dd')} - ${format(new Date(endDate), 'MMM dd')}`
               : dateFilter === 'all_time'
-              ? `Dec 31, 1999 - ${format(new Date(), 'MMM dd')}`
+              ? 'All Time'
               : startDate && endDate
               ? `${format(new Date(startDate), 'MMM dd')} - ${format(new Date(endDate), 'MMM dd')}`
               : 'Select Range'}
@@ -261,8 +278,8 @@ const CompetitionLogScreen = ({ navigation }) => {
                 <View key={idx} style={styles.resultContainer}>
                   <Text style={styles.event}>{result.Event}</Text>
                   <Text style={styles.position}>Position: {result.Position}</Text>
-                  <Text style={styles.time}>Mark: {result.Mark}</Text>
-                </View>
+                  <Text style={styles.time}>Mark: {formatTime(result.Mark)}</Text>
+                  </View>
               ))}
             </TouchableOpacity>
           ))

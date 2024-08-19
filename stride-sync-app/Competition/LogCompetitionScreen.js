@@ -5,6 +5,7 @@ import { format, isBefore, startOfDay } from 'date-fns';
 import RNPickerSelect from 'react-native-picker-select';
 import Footer from '../Footer';
 import Header from '../Header';
+import { Switch } from 'react-native'; 
 
 const eventOptions = [
   { label: '60m', value: '60m' },
@@ -29,18 +30,34 @@ const eventOptions = [
 ];
 
 const convertTimeToSeconds = (time) => {
-  const timeRegex = /^((\d+):)?(\d+):(\d+)(\.(\d+))?$/;
+  if (!time) return 0;
+
+  // Regular expression to match time formats
+  const timeRegex = /^((\d{1,2}):)?(\d{1,2}):(\d{2})(\.(\d{1,3}))?$/;
+  const decimalRegex = /^\d+(\.\d+)?$/;
+
+  if (decimalRegex.test(time)) {
+    return parseFloat(time);
+  }
+
   const matches = time.match(timeRegex);
 
-  if (!matches) return 0;
+  if (!matches) {
+    console.log('Time format error:', time); // Log if format is incorrect
+    return 0;
+  }
 
   const hours = parseInt(matches[2] || '0', 10);
-  const minutes = parseInt(matches[3], 10);
+  const minutes = parseInt(matches[3] || '0', 10);
   const seconds = parseInt(matches[4], 10);
-  const milliseconds = parseInt((matches[6] || '0').substring(0, 2), 10);
+  const milliseconds = parseFloat((matches[6] || '0').padEnd(3, '0')); // Corrected to match the right group
 
-  return hours * 3600 + minutes * 60 + seconds + milliseconds / 100;
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+  console.log(`Parsed Time: ${hours}:${minutes}:${seconds}.${milliseconds}, Total Seconds: ${totalSeconds}`);
+  return totalSeconds;
 };
+
+
 
 const LogCompetitionScreen = ({ navigation }) => {
   const [competitionName, setCompetitionName] = useState('');
@@ -51,6 +68,7 @@ const LogCompetitionScreen = ({ navigation }) => {
   const [currentPBs, setCurrentPBs] = useState({});
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
+  const [isIndoor, setIsIndoor] = useState(false);
 
   // Get today's date
   const today = startOfDay(new Date());
@@ -98,18 +116,21 @@ const LogCompetitionScreen = ({ navigation }) => {
     if (competitionName && events.every(e => e.event && e.mark && e.position)) {
       // Convert marks to seconds
       const updatedPBs = { ...currentPBs };
-
+      
       events.forEach(e => {
         if (e.event && e.mark) {
           const markInSeconds = convertTimeToSeconds(e.mark);
+          console.log(`Event: ${e.event}`);
+          console.log(`Raw Mark: ${e.mark}`);
+          console.log(`Converted Mark in Seconds: ${markInSeconds}`);
           const currentPB = parseFloat(updatedPBs[e.event]) || Infinity;
-
+  
           if (markInSeconds < currentPB) {
             updatedPBs[e.event] = e.mark;
           }
         }
       });
-
+  
       const competitionData = {
         AthleteID: 1, // Replace with actual athlete ID if needed
         CompetitionName: competitionName,
@@ -120,9 +141,10 @@ const LogCompetitionScreen = ({ navigation }) => {
           Position: e.position,
         })),
         Notes: notes,
+        IsIndoor: isIndoor, 
+        UpdatedPersonalBests: updatedPBs,
       };
-
-      // Send the competition data
+  
       fetch('http://192.168.100.71:3000/api/competitions', {
         method: 'POST',
         headers: {
@@ -133,33 +155,8 @@ const LogCompetitionScreen = ({ navigation }) => {
         .then(response => response.json())
         .then(data => {
           if (data.CompetitionID) {
-            // If competition data is saved successfully, update the profile
             console.log('Success: Competition data saved successfully.', data);
-            
-            // Update athlete profile with new PBs
-            fetch('http://192.168.100.71:3000/api/athlete-profiles/1', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                PersonalBests: updatedPBs,
-              }),
-            })
-              .then(response => response.json())
-              .then(profileData => {
-                if (profileData) {
-                  console.log('Success: Athlete profile updated successfully.', profileData);
-                  navigation.navigate('CompetitionLog');
-                } else {
-                  console.error('Failed to update athlete profile:', profileData);
-                  Alert.alert('Error', 'Failed to update athlete profile.');
-                }
-              })
-              .catch(error => {
-                console.error('Error updating athlete profile:', error);
-                Alert.alert('Error', 'An error occurred while updating athlete profile.');
-              });
+            navigation.navigate('CompetitionLog');
           } else {
             console.error('Failed to save competition data:', data);
             Alert.alert('Error', 'Failed to save competition data.');
@@ -173,6 +170,7 @@ const LogCompetitionScreen = ({ navigation }) => {
       Alert.alert('Error', 'Please fill out all fields.');
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -204,6 +202,19 @@ const LogCompetitionScreen = ({ navigation }) => {
               onChange={handleDateChange}
             />
           )}
+        </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Competition Type</Text>
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>Outdoor</Text>
+            <Switch
+              value={isIndoor}
+              onValueChange={setIsIndoor}
+              thumbColor={isIndoor ? '#4CAF50' : '#ccc'}
+              trackColor={{ false: '#ccc', true: '#4CAF50' }}
+            />
+            <Text style={styles.switchLabel}>Indoor</Text>
+          </View>
         </View>
 
         {events.map((event, index) => (
@@ -274,7 +285,6 @@ const LogCompetitionScreen = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -399,6 +409,15 @@ const styles = StyleSheet.create({
     placeholder: {
       color: '#888',
     },
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: 'white',
   },
 });
 const pickerSelectStyles = {

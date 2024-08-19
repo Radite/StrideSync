@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import RNPickerSelect from 'react-native-picker-select';
 import { format, isBefore, startOfDay } from 'date-fns';
 import Header from '../Header'; // Adjust the import path as needed
 import Footer from '../Footer'; // Adjust the import path as needed
-import { Platform } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const LogTraining = ({ navigation }) => {
   const today = startOfDay(new Date());
@@ -635,11 +636,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   scrollContent: {
-    padding: 20,
+    padding: '5%', // Responsive padding
   },
   datePickerContainer: {
     marginBottom: 20,
-    padding: 10,
+    padding: '5%',
     borderRadius: 10,
     backgroundColor: '#1E1E1E',
   },
@@ -651,7 +652,8 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     backgroundColor: '#2A2A2A',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 5,
     alignItems: 'center',
   },
@@ -661,18 +663,19 @@ const styles = StyleSheet.create({
   },
   formGroup: {
     marginBottom: 20,
-    padding: 10,
+    padding: '5%',
     borderRadius: 10,
     backgroundColor: '#1E1E1E',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center', // Ensure vertical alignment
   },
   inputGroup: {
     flex: 1,
     marginHorizontal: 5,
-    marginTop:5,
+    marginTop: 5,
   },
   input: {
     height: 40,
@@ -685,17 +688,23 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#FFB74D',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 5,
     marginBottom: 70,
     alignItems: 'center',
+    width: width * 0.9, // Responsive width
+    alignSelf: 'center', // Center horizontally
   },
   addButton: {
     backgroundColor: '#FFB74D',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 5,
     marginBottom: 10,
     alignItems: 'center',
+    width: width * 0.9, // Responsive width
+    alignSelf: 'center', // Center horizontally
   },
   addButtonText: {
     color: '#000000',
@@ -703,20 +712,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
   },
   deleteButton: {
-    width: 25, // Adjust size as needed
-    height: 25, // Adjust size as needed
+    width: 30, // Adjust size as needed
+    height: 30, // Adjust size as needed
     borderRadius: 15, // This makes the button circular
     backgroundColor: 'orange', // Fill color
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute', // Positioning can be adjusted based on where you want the button
-    top: 5, // Adjust as necessary
-    right: 5, // Adjust as necessary
+    top: 10, // Adjust as necessary
+    right: 10, // Adjust as necessary
   },
-
   deleteButtonText: {
     color: 'white', // Text color
-    fontSize: 14, // Font size for "X"
+    fontSize: 16, // Font size for "X"
     fontWeight: 'bold', // Make the "X" bold
   },
 });

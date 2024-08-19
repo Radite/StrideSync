@@ -11,7 +11,6 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
   const { sessionId } = route.params;
   const [sessionDetails, setSessionDetails] = useState(null);
 
-  
   useEffect(() => {
     // Fetch session details from the API
     axios.get(`http://192.168.100.71:3000/api/training-sessions/${sessionId}`)
@@ -169,20 +168,21 @@ const TrainingSessionDetailsScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212', // Darker background for modern look
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: '5%', // Responsive padding
     paddingBottom: 20,
     marginTop: 10,
   },
   detailsCard: {
     backgroundColor: '#1E1E1E',
     borderRadius: 12,
-    padding: 20,
+    padding: 15,
     marginBottom: 20,
     borderColor: '#2A2A2A',
     borderWidth: 1,
@@ -191,7 +191,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
-    width: width - 40,
+    width: '90%', // Responsive width
+    alignSelf: 'center', // Center horizontally
     flexDirection: 'row',
     justifyContent: 'space-between', // Space items evenly across the card
   },
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
   eventList: {
     backgroundColor: '#1E1E1E',
     borderRadius: 12,
-    padding: 20,
+    padding: 15,
   },
   eventCard: {
     backgroundColor: '#2A2A2A',
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#1E1E1E', // Use a slightly lighter background for cards
     borderRadius: 12,
-    padding: 20,
+    padding: 15,
     marginBottom: 15,
     borderColor: '#2A2A2A', // Subtle border color
     borderWidth: 1,
@@ -272,12 +273,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
-    width: width - 40,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFC107', // Updated to a more modern yellow accent
+    width: '90%', // Responsive width
+    alignSelf: 'center', // Center horizontally
   },
   cardValue: {
     fontSize: 15,
@@ -287,6 +284,7 @@ const styles = StyleSheet.create({
   deleteButtonContainer: {
     marginVertical: 20,
     alignItems: 'center',
+    marginBottom: 60,
   },
   deleteButton: {
     backgroundColor: '#FF3B30', // Bright red background for delete button
