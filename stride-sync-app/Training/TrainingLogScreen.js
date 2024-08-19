@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native'; // Import the hook
 import Footer from '../Footer';
 import Header from '../Header';
 import useTrainingData from './useTrainingData'; // Import the custom hook
@@ -20,7 +21,14 @@ const TrainingLogScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const { historicalData, loading, error } = useTrainingData();
+  const { historicalData, loading, error, refetch } = useTrainingData();
+
+  // Refetch data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   useEffect(() => {
     if (historicalData) {
