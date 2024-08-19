@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { format } from 'date-fns';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -23,20 +23,19 @@ const getOrdinal = (number) => {
 
 // Function to determine the mark unit
 const getMarkUnit = (eventName) => {
+  // Check if event ends with "m" or contains certain keywords
   if (eventName.endsWith('m') || eventName.includes('steeplechase') || eventName.includes('marathon')) {
     return 's'; // Seconds for running events
   }
   return 'm'; // Meters for other events
 };
 
-// Get screen dimensions
-const { width, height } = Dimensions.get('window');
-
 const CompetitionDetailScreen = ({ route, navigation }) => {
   const { competition } = route.params;
   const sessionId = competition.CompetitionID;  // Extract session ID from competition
 
   const handleDelete = () => {
+    // Ask for confirmation before deleting
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this competition?",
@@ -48,6 +47,7 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
           onPress: () => {
             axios.delete(`http://192.168.100.71:3000/api/competitions/${sessionId}`)
               .then(() => {
+                // Redirect to the Training Log screen after deletion
                 navigation.navigate('TrainingLog');
               })
               .catch(error => {
@@ -85,7 +85,9 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{competition.CompetitionName}</Text>
         <Text style={styles.date}>{format(new Date(competition.CompetitionDate), 'MMM dd, yyyy')}</Text>
+        
 
+        
         <Text style={styles.isIndoor}>
           {competition.IsIndoor ? 'Indoor Event' : 'Outdoor Event'}
         </Text>
@@ -107,7 +109,7 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
             </View>
           ))}
         </View>
-
+        {/* Notes Section */}
         {competition.Notes ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Notes</Text>
@@ -116,7 +118,7 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
             </View>
           </View>
         ) : null}
-
+        {/* Delete Button */}
         <View style={styles.deleteButtonContainer}>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Text style={styles.deleteButtonText}>Delete Competition</Text>
@@ -124,7 +126,7 @@ const CompetitionDetailScreen = ({ route, navigation }) => {
         </View>
       </ScrollView>
 
-      <Footer />
+      <Footer navigation={navigation} />
     </View>
   );
 };
@@ -135,39 +137,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
   },
   content: {
-    paddingHorizontal: width * 0.05, // 5% of screen width
-    paddingBottom: height * 0.1, // 10% of screen height
+    paddingHorizontal: 20,
+    paddingBottom: 100,
     marginTop: 10,
   },
   title: {
-    fontSize: width * 0.055, // Responsive font size
+    fontSize: 22,
     fontWeight: '700',
     color: '#FFC107',
     marginBottom: 10,
   },
   date: {
-    fontSize: width * 0.04,
+    fontSize: 16,
     color: '#BBBBBB',
     marginBottom: 20,
   },
-  isIndoor: {
-    fontSize: width * 0.04,
-    color: '#fff',
-    marginVertical: 8,
+  notes: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    marginBottom: 20,
   },
   eventList: {
     backgroundColor: '#1E1E1E',
     borderRadius: 12,
-    padding: width * 0.05,
+    padding: 20,
   },
   eventCard: {
     backgroundColor: '#2A2A2A',
     borderRadius: 10,
-    padding: width * 0.04,
-    marginBottom: width * 0.04,
+    padding: 15,
+    marginBottom: 15,
   },
   eventTitle: {
-    fontSize: width * 0.045,
+    fontSize: 18,
     fontWeight: '600',
     color: '#FFC107',
     marginBottom: 10,
@@ -178,37 +180,42 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   eventLabel: {
-    fontSize: width * 0.04,
+    fontSize: 16,
     fontWeight: '500',
     color: '#BBBBBB',
   },
   eventValue: {
-    fontSize: width * 0.04,
+    fontSize: 16,
     fontWeight: '500',
     color: '#FFFFFF',
   },
   deleteButtonContainer: {
-    marginVertical: height * 0.02,
+    marginVertical: 20,
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: width * 0.03,
-    paddingHorizontal: width * 0.07,
+    backgroundColor: '#FF3B30', // Bright red background for delete button
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
     alignItems: 'center',
   },
   deleteButtonText: {
     color: '#FFFFFF',
-    fontSize: width * 0.045,
+    fontSize: 18,
     fontWeight: '600',
   },
+  isIndoor: {
+    fontSize: 16,
+    color: '#fff',
+    marginVertical: 8,
+  },
   section: {
-    marginBottom: height * 0.03,
+    marginBottom: 25,
     marginTop: 20,
   },
   sectionTitle: {
-    fontSize: width * 0.055,
+    fontSize: 22,
     fontWeight: '700',
     color: '#FFC107',
     marginBottom: 12,
@@ -217,23 +224,23 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   card: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#1E1E1E', // Use a slightly lighter background for cards
     borderRadius: 12,
-    padding: width * 0.04,
-    marginBottom: width * 0.04,
-    borderColor: '#2A2A2A',
+    padding: 15,
+    marginBottom: 15,
+    borderColor: '#2A2A2A', // Subtle border color
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
-    width: '100%',
-    alignSelf: 'center',
+    width: '100%', // Responsive width
+    alignSelf: 'center', // Center horizontally
   },
   cardValue: {
-    fontSize: width * 0.04,
-    color: '#F5F5F5',
+    fontSize: 15,
+    color: '#F5F5F5', // Slightly lighter text for contrast
     marginTop: 8,
   },
 });

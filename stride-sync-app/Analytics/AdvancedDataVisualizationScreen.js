@@ -1,25 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Switch } from 'react-native';
-import { LineChart, PieChart, ContributionGraph } from 'react-native-chart-kit';
-import RNPickerSelect from 'react-native-picker-select'; // Import RNPickerSelect
+import { LineChart, PieChart } from 'react-native-chart-kit';
+import RNPickerSelect from 'react-native-picker-select';
 import Footer from '../Footer';
 import Header from '../Header';
+import TrainingDataVisualization from './TrainingDataVisualization'; 
+import axios from 'axios';
 
 const AdvancedDataVisualizationScreen = ({ navigation }) => {
-  // State to toggle between Races and Training
   const [isTraining, setIsTraining] = React.useState(true);
-
-  // State for selected event in races section
+  const [loading, setLoading] = useState(true);
+  const [selectedMetric, setSelectedMetric] = useState('TotalDistanceRan');
+  const [trainingData, setTrainingData] = useState([]);
   const [selectedEvent, setSelectedEvent] = React.useState('5K');
-
-  // Sample Data
-  const trainingVolumeData = [20, 45, 28, 80, 99, 43];
-  const trainingTypeData = [
-    { name: 'Endurance', time: 30, color: 'rgba(131, 167, 234, 1)' },
-    { name: 'Speed Work', time: 20, color: '#FF6347' },
-    { name: 'Strength', time: 15, color: '#FFA500' },
-    { name: 'Recovery', time: 35, color: '#32CD32' },
-  ];
 
   const pbsData = [20, 35, 30, 50, 60, 45];
   const raceDistancesData = [
@@ -32,15 +25,8 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
     { name: 'Marathon', distance: 42, color: '#1E90FF' },
   ];
 
-  const heatmapData = [
-    { date: '2024-08-12', count: 3 },
-    { date: '2024-08-13', count: 5 },
-    { date: '2024-08-14', count: 2 },
-    { date: '2024-08-15', count: 6 },
-  ];
-
   const performanceData = {
-    '100m': [12, 11.8, 11.5, 11.3, 11.1, 11.0],
+    '100m': [12, 11.8, 11.5, 11.3, 11.2, 11.0],
     '200m': [24.5, 23.8, 23.4, 23.0, 22.8, 22.5],
     '400m': [56, 54.8, 54.0, 53.5, 53.0, 52.5],
     '5K': [20, 21, 19, 18, 20, 19],
@@ -51,79 +37,41 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
 
   const toggleSwitch = () => setIsTraining(!isTraining);
 
+  const fetchTrainingData = async () => {
+    try {
+      const response = await axios.get('http://192.168.100.71:3000/api/training-sessions/athlete/1');
+      setTrainingData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching training data:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrainingData();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Header title="Data Visualization" navigation={navigation} />
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Training</Text>
+        <Text style={styles.switchLabel}>Races</Text>
         <Switch
           value={isTraining}
           onValueChange={toggleSwitch}
           thumbColor="#FFB74D"
-          trackColor={{ false: '#767577', true: '#FFB74D' }}
+          trackColor={{ false: '#767577', true: '#767577' }}
         />
-        <Text style={styles.switchLabel}>Races</Text>
+        <Text style={styles.switchLabel}>Training</Text>
       </View>
-      <ScrollView style={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {isTraining ? (
-          <>
-            <Text style={styles.chartTitle}>Training Volume Per Week</Text>
-            <LineChart
-              data={{
-                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-                datasets: [{ data: trainingVolumeData }],
-              }}
-              width={Dimensions.get('window').width * 0.9}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix="km"
-              chartConfig={{
-                backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
-                backgroundGradientTo: '#1C1C1C',
-                decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-                style: { borderRadius: 12 },
-              }}
-              style={styles.chart}
-            />
-
-            <Text style={styles.chartTitle}>Distribution of Training Types</Text>
-            <PieChart
-              data={trainingTypeData}
-              width={Dimensions.get('window').width * 0.9}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
-                backgroundGradientTo: '#1C1C1C',
-                color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-              }}
-              accessor="time"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              style={styles.chart}
-            />
-
-            <Text style={styles.chartTitle}>Volume by Day of the Week</Text>
-            <ContributionGraph
-              values={heatmapData}
-              endDate={new Date()}
-              numDays={7}
-              width={Dimensions.get('window').width * 0.9}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
-                backgroundGradientTo: '#1C1C1C',
-                color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-              }}
-              style={styles.chart}
-            />
-          </>
+          <TrainingDataVisualization
+            trainingData={trainingData}
+            selectedMetric={selectedMetric}
+            setSelectedMetric={setSelectedMetric}
+          />
         ) : (
           <>
             <Text style={styles.chartTitle}>Select Event</Text>
@@ -154,7 +102,13 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-                style: { borderRadius: 12 },
+                style: {
+                  borderRadius: 12,
+                  marginLeft: 10, // Ensure space on the left for axis labels
+                },
+                propsForHorizontalLabels: {
+                  fontSize: 12, // Adjust font size
+                },
               }}
               style={styles.chart}
             />
@@ -187,7 +141,7 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
                 datasets: [
                   {
-                    data: trainingVolumeData,
+                    data: pbsData,
                     color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                     label: 'Training Load',
                   },
@@ -209,7 +163,13 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-                style: { borderRadius: 12 },
+                style: {
+                  borderRadius: 12,
+                  marginLeft: 10, // Ensure space on the left for axis labels
+                },
+                propsForHorizontalLabels: {
+                  fontSize: 12, // Adjust font size
+                },
               }}
               style={styles.chart}
             />
@@ -225,6 +185,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0A0A0A',
+    
   },
   switchContainer: {
     flexDirection: 'row',
@@ -258,6 +219,7 @@ const styles = StyleSheet.create({
     color: '#FFB74D',
   },
 });
+
 
 // Picker styles for RNPickerSelect
 const pickerStyles = StyleSheet.create({
