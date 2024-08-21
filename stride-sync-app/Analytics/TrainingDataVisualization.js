@@ -72,9 +72,13 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
       <LineChart
         data={getChartData(selectedMetric)}
         width={Dimensions.get('window').width * 0.9}
-        height={220}
+        height={260}
         yAxisLabel=""
         yAxisSuffix="m"
+        formatYLabel={(yValue) => {
+          if (yValue >= 1000) return `${(yValue / 1000).toFixed(1)}k`;
+          return yValue;
+        }}
         chartConfig={{
           backgroundColor: '#0A0A0A',
           backgroundGradientFrom: '#1C1C1C',
@@ -82,10 +86,31 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
           decimalPlaces: 2,
           color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
-          style: { borderRadius: 12 },
+          style: {
+            borderRadius: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 6,
+          },
+          propsForDots: {
+            r: '6',
+            strokeWidth: '2',
+            stroke: '#FFA500',
+          },
+          propsForBackgroundLines: {
+            strokeDasharray: '', // solid background lines
+          },
+          propsForLabels: {
+            fontSize: 12,
+            fontWeight: 'bold',
+          },
         }}
+        bezier
         style={styles.chart}
       />
+
+
 
       <Text style={styles.chartTitle}>Distribution of Training Types</Text>
       <PieChart

@@ -95,6 +95,10 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
               height={220}
               yAxisLabel=""
               yAxisSuffix="s"
+              formatYLabel={(yValue) => {
+                if (yValue >= 1000) return `${(yValue / 1000).toFixed(1)}k`;
+                return yValue;
+              }}
               chartConfig={{
                 backgroundColor: '#0A0A0A',
                 backgroundGradientFrom: '#1C1C1C',
@@ -104,14 +108,15 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
                 style: {
                   borderRadius: 12,
-                  marginLeft: 10, // Ensure space on the left for axis labels
+                  marginLeft: 10,
                 },
                 propsForHorizontalLabels: {
-                  fontSize: 12, // Adjust font size
+                  fontSize: 12,
                 },
               }}
               style={styles.chart}
             />
+
 
             <Text style={styles.chartTitle}>Distribution of Race Types</Text>
             <PieChart
