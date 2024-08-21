@@ -7,11 +7,50 @@ import EventForm from './EventForm';
 import { convertTimeToSeconds } from '../../Utils/eventUtils';
 import styles from '../../Styles/LogCompetitionScreenStyles';
 
+// Function to validate individual marks
+const validateMark = (mark) => {
+  // Regular expression to validate time format
+  const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$|^(\d{2})$|^(\d{1})$/;
+
+  // Normalize the mark to ensure milliseconds are properly handled
+  let normalizedMark = mark.trim();
+
+  // Match the time pattern and capture groups
+  const match = timePattern.exec(normalizedMark);
+  if (!match) {
+    return 'Marks must be in the format SS.ss, MM:SS.ss, or HH:MM:SS.ss.';
+  }
+
+  // Extract time components from regex match
+  const [hours, minutes, seconds, milliseconds] = [
+    match[1] || '00', // Default to '00' if not provided
+    match[2] || '00',
+    match[3] || '00',
+    match[4] || '00'
+  ];
+
+  // Validate ranges
+  if (hours && (hours < 0 || hours > 23)) {
+    return 'Invalid hours value.';
+  }
+  if (minutes && (minutes < 0 || minutes > 59)) {
+    return 'Invalid minutes value.';
+  }
+  if (seconds && (seconds < 0 || seconds > 59)) {
+    return 'Invalid seconds value.';
+  }
+  if (milliseconds && (milliseconds < 0 || milliseconds > 99)) {
+    return 'Invalid milliseconds value.';
+  }
+
+  return null; // No error
+};
+
 const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
   const [competitionName, setCompetitionName] = useState('');
   const [competitionDate, setCompetitionDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [events, setEvents] = useState([{ event: '', mark: '', position: '' }]);
+  const [events, setEvents] = useState([{ event: '', mark: '', position: '', markError: '' }]);
   const [notes, setNotes] = useState('');
   const [isIndoor, setIsIndoor] = useState(false);
 
@@ -26,12 +65,19 @@ const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
   };
 
   const handleAddEvent = () => {
-    setEvents([...events, { event: '', mark: '', position: '' }]);
+    setEvents([...events, { event: '', mark: '', position: '', markError: '' }]);
   };
 
   const handleEventChange = (index, field, value) => {
     const newEvents = [...events];
     newEvents[index][field] = value;
+
+    if (field === 'mark') {
+      // Validate mark when changed
+      const error = validateMark(value);
+      newEvents[index].markError = error;
+    }
+    
     setEvents(newEvents);
   };
 
@@ -41,22 +87,37 @@ const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
   };
 
   const handleSubmit = () => {
-    if (competitionName && events.every(e => e.event && e.mark && e.position)) {
-      const competitionData = {
-        CompetitionName: competitionName,
-        CompetitionDate: format(competitionDate, 'yyyy-MM-dd'),
-        EventResults: events.map(e => ({
-          Event: e.event,
-          Mark: convertTimeToSeconds(e.mark),
-          Position: e.position,
-        })),
-        Notes: notes,
-        IsIndoor: isIndoor,
-      };
-      onSubmit(competitionData);
-    } else {
-      Alert.alert('Error', 'Please fill out all fields.');
+    // Validate all marks before submission
+    const isValid = events.every(e => e.mark && !e.markError);
+    
+    if (!competitionName) {
+      Alert.alert('Error', 'Competition Name is required.');
+      return;
     }
+    
+    if (!isValid) {
+      alert('Marks must be in the format SS.ss, MM:SS.ss, or HH:MM:SS.ss.');
+      return;
+    }
+
+    if (events.some(e => !e.event || !e.position)) {
+      Alert.alert('Error', 'Please fill out all event fields.');
+      return;
+    }
+
+    const competitionData = {
+      CompetitionName: competitionName,
+      CompetitionDate: format(competitionDate, 'yyyy-MM-dd'),
+      EventResults: events.map(e => ({
+        Event: e.event,
+        Mark: convertTimeToSeconds(e.mark),
+        Position: e.position,
+      })),
+      Notes: notes,
+      IsIndoor: isIndoor,
+    };
+    
+    onSubmit(competitionData);
   };
 
   return (
@@ -110,6 +171,7 @@ const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
           eventOptions={eventOptions}
           handleEventChange={handleEventChange}
           handleDeleteEvent={handleDeleteEvent}
+          markError={event.markError}
         />
       ))}
 

@@ -303,7 +303,7 @@ fetch('http://192.168.100.71:3000/api/training-sessions/', {
   .then(response => response.json())
   .then(data => {
     console.log('Athlete profile updated successfully:', data);
-    //navigation.navigate('TrainingLog');
+    navigation.navigate('TrainingLog');
   })
   .catch(error => {
     console.error('Error:', error);
