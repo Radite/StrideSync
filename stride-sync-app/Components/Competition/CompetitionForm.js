@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Switch } fr
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, isBefore, startOfDay } from 'date-fns';
 import EventForm from './EventForm';
-import { convertTimeToSeconds } from '../../Utils/EventUtils';
+import { convertTimeToSeconds } from '../../Utils/eventUtils';
 import styles from '../../Styles/LogCompetitionScreenStyles';
 
 const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
