@@ -5,23 +5,27 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import CompetitionDetailScreen from './Competition/CompetitionDetailScreen'; // Import the new screen
 
 // Import screens
+import DashboardScreen from './Screens/DashboardScreen'; 
+
+import TrainingLogScreen from './Screens/TrainingLogScreen';
+import LogTraining from './Screens/LogTrainingScreen';
+import TrainingSessionDetailsScreen from './Screens/TrainingSessionDetailsScreen';
+
+import CompetitionDetailScreen from './Screens/CompetitionDetailScreen'; 
+import CompetitionLogScreen from './Screens/CompetitionLogScreen';
+import LogCompetitionScreen from './Screens/LogCompetitionScreen';
+
 import LoginScreen from './Startup/LoginScreen';
 import EmailSignInScreen from './Startup/EmailSignInScreen';
 import SignUpScreen from './Startup/SignUpScreen';
 import PasswordRecoveryScreen from './Startup/PasswordRecoveryScreen';
-import DashboardScreen from './Dashboard/DashboardScreen'; 
 import ProfileScreen from './ProfileScreen';
 import SettingsScreen from './SettingsScreen';
-import TrainingLogScreen from './Training/TrainingLogScreen';
-import LogTraining from './Training/LogTraining';
-import PerformancePredictionScreen from './Performance/PerformancePredictionScreen';
-import CompetitionLogScreen from './Competition/CompetitionLogScreen';
-import LogCompetitionScreen from './Competition/LogCompetitionScreen';
+
+import PerformancePredictionScreen from './Screens/PerformancePredictionScreen';
 import AdvancedDataVisualizationScreen from './Analytics/AdvancedDataVisualizationScreen';
-import TrainingSessionDetailsScreen from './Training/TrainingSessionDetailsScreen';
 const Stack = createStackNavigator();
 
 const AppLoadingScreen = () => (
