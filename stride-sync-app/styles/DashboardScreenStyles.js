@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: RFValue(18),
     color: '#E0E0E0',
-    marginTop: 30,
     textAlign: 'center',
     fontStyle: 'italic',
     paddingHorizontal: 15,
