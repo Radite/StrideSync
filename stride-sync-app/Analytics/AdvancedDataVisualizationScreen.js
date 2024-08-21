@@ -4,15 +4,15 @@ import { LineChart, PieChart } from 'react-native-chart-kit';
 import RNPickerSelect from 'react-native-picker-select';
 import Footer from '../Footer';
 import Header from '../Header';
-import TrainingDataVisualization from './TrainingDataVisualization'; 
+import TrainingDataVisualization from './TrainingDataVisualization';
 import axios from 'axios';
 
 const AdvancedDataVisualizationScreen = ({ navigation }) => {
-  const [isTraining, setIsTraining] = React.useState(true);
+  const [isTraining, setIsTraining] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState('TotalDistanceRan');
   const [trainingData, setTrainingData] = useState([]);
-  const [selectedEvent, setSelectedEvent] = React.useState('5K');
+  const [selectedEvent, setSelectedEvent] = useState('5K');
 
   const pbsData = [20, 35, 30, 50, 60, 45];
   const raceDistancesData = [
@@ -92,7 +92,7 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 datasets: [{ data: performanceData[selectedEvent] }],
               }}
               width={Dimensions.get('window').width * 0.9}
-              height={220}
+              height={250}
               yAxisLabel=""
               yAxisSuffix="s"
               formatYLabel={(yValue) => {
@@ -101,22 +101,34 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
               }}
               chartConfig={{
                 backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
+                backgroundGradientFrom: '#333',
                 backgroundGradientTo: '#1C1C1C',
                 decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
                 style: {
-                  borderRadius: 12,
-                  marginLeft: 10,
+                  borderRadius: 16,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 3,
+                  elevation: 5,
                 },
-                propsForHorizontalLabels: {
-                  fontSize: 12,
+                propsForDots: {
+                  r: '6',
+                  strokeWidth: '2',
+                  stroke: '#FF6347',
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: '',
+                  strokeOpacity: 0.2,
+                  strokeWidth: 1,
+                  stroke: '#FFF',
                 },
               }}
+              bezier
               style={styles.chart}
             />
-
 
             <Text style={styles.chartTitle}>Distribution of Race Types</Text>
             <PieChart
@@ -126,10 +138,10 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 color: race.color,
               }))}
               width={Dimensions.get('window').width * 0.9}
-              height={220}
+              height={250}
               chartConfig={{
                 backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
+                backgroundGradientFrom: '#333',
                 backgroundGradientTo: '#1C1C1C',
                 color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
@@ -137,7 +149,7 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
               accessor="time"
               backgroundColor="transparent"
               paddingLeft="15"
-              style={styles.chart}
+              style={[styles.chart, styles.pieChart]}
             />
 
             <Text style={styles.chartTitle}>Performance Peaks and Tapers</Text>
@@ -158,24 +170,37 @@ const AdvancedDataVisualizationScreen = ({ navigation }) => {
                 ],
               }}
               width={Dimensions.get('window').width * 0.9}
-              height={220}
+              height={250}
               yAxisLabel=""
               yAxisSuffix="km"
               chartConfig={{
                 backgroundColor: '#0A0A0A',
-                backgroundGradientFrom: '#1C1C1C',
+                backgroundGradientFrom: '#333',
                 backgroundGradientTo: '#1C1C1C',
                 decimalPlaces: 2,
                 color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(240, 240, 240, ${opacity})`,
                 style: {
-                  borderRadius: 12,
-                  marginLeft: 10, // Ensure space on the left for axis labels
+                  borderRadius: 16,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 3,
+                  elevation: 5,
                 },
-                propsForHorizontalLabels: {
-                  fontSize: 12, // Adjust font size
+                propsForDots: {
+                  r: '6',
+                  strokeWidth: '2',
+                  stroke: '#FF6347',
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: '',
+                  strokeOpacity: 0.2,
+                  strokeWidth: 1,
+                  stroke: '#FFF',
                 },
               }}
+              bezier
               style={styles.chart}
             />
           </>
@@ -190,7 +215,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0A0A0A',
-    
   },
   switchContainer: {
     flexDirection: 'row',
@@ -216,17 +240,14 @@ const styles = StyleSheet.create({
   },
   chart: {
     marginVertical: 15,
-    borderRadius: 12,
+    borderRadius: 16,
   },
-  picker: {
-    height: 50,
-    width: Dimensions.get('window').width * 0.9,
-    color: '#FFB74D',
+  pieChart: {
+    borderWidth: 1,
+    borderColor: '#FF6347',
   },
 });
 
-
-// Picker styles for RNPickerSelect
 const pickerStyles = StyleSheet.create({
   inputIOS: {
     height: 50,

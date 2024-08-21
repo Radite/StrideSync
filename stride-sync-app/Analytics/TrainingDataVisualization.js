@@ -81,7 +81,7 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
         }}
         chartConfig={{
           backgroundColor: '#0A0A0A',
-          backgroundGradientFrom: '#1C1C1C',
+          backgroundGradientFrom: '#333',
           backgroundGradientTo: '#1C1C1C',
           decimalPlaces: 2,
           color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
@@ -89,21 +89,21 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
           style: {
             borderRadius: 16,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 6,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.8,
+            shadowRadius: 3,
+            elevation: 5,
           },
           propsForDots: {
             r: '6',
             strokeWidth: '2',
-            stroke: '#FFA500',
+            stroke: '#FF6347',
           },
           propsForBackgroundLines: {
-            strokeDasharray: '', // solid background lines
-          },
-          propsForLabels: {
-            fontSize: 12,
-            fontWeight: 'bold',
+            strokeDasharray: '',
+            strokeOpacity: 0.2,
+            strokeWidth: 1,
+            stroke: '#FFF',
           },
         }}
         bezier
@@ -130,7 +130,7 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
           return acc;
         }, [])}
         width={Dimensions.get('window').width * 0.9}
-        height={220}
+        height={250}
         chartConfig={{
           backgroundColor: '#0A0A0A',
           backgroundGradientFrom: '#1C1C1C',
@@ -150,9 +150,10 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
 // Style definitions
 const styles = StyleSheet.create({
   chartTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    marginVertical: 10,
+    fontSize: 22,
+    color: '#FFB74D',
+    marginVertical: 15,
+    fontFamily: 'Montserrat-Bold',
   },
   chart: {
     marginVertical: 8,
