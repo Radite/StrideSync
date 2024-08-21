@@ -303,7 +303,7 @@ fetch('http://192.168.100.71:3000/api/training-sessions/', {
   .then(response => response.json())
   .then(data => {
     console.log('Athlete profile updated successfully:', data);
-    navigation.navigate('TrainingLog');
+    //navigation.navigate('TrainingLog');
   })
   .catch(error => {
     console.error('Error:', error);
@@ -318,7 +318,7 @@ const removeEntry = (index) => {
 
 const validateFields = () => {
   // Regular expression to validate time format
-  const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})\.(\d{2})$|^(\d{1,2}):(\d{2})\.(\d{2})$|^(\d{2})\.(\d{2})$/;
+  const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$|^(\d{2})$|^(\d{1})$/;
 
   // Check if training type is selected
   if (!trainingType) {
@@ -358,8 +358,39 @@ const validateFields = () => {
         return false;
       }
       
-      if (!timePattern.test(mark)) {
-        alert('Marks must be in the format ss.ss, mm:ss.ss, or hh:mm:ss.ss.');
+      // Normalize the mark to ensure milliseconds are properly handled
+      let normalizedMark = mark.trim();
+      
+      // Match the time pattern and capture groups
+      const match = timePattern.exec(normalizedMark);
+      if (!match) {
+        alert('Marks must be in the format SS.ss, MM:SS.ss, or HH:MM:SS.ss.');
+        return false;
+      }
+
+      // Extract time components from regex match
+      const [hours, minutes, seconds, milliseconds] = [
+        match[1] || '00', // Default to '00' if not provided
+        match[2] || '00',
+        match[3] || '00',
+        match[4] || '00'
+      ];
+
+      // Validate ranges
+      if (hours && (hours < 0 || hours > 23)) {
+        alert('Invalid hours value.');
+        return false;
+      }
+      if (minutes && (minutes < 0 || minutes > 59)) {
+        alert('Invalid minutes value.');
+        return false;
+      }
+      if (seconds && (seconds < 0 || seconds > 59)) {
+        alert('Invalid seconds value.');
+        return false;
+      }
+      if (milliseconds && (milliseconds < 0 || milliseconds > 99)) {
+        alert('Invalid milliseconds value.');
         return false;
       }
     }
