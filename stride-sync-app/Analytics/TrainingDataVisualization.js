@@ -62,11 +62,18 @@ const TrainingDataVisualization = ({ trainingData, selectedMetric, setSelectedMe
         onValueChange={(itemValue) => setSelectedMetric(itemValue)}
         style={pickerStyles}
         items={[
-          { label: 'Distance Ran', value: 'TotalDistanceRan' },
-          { label: 'Distance Long Jumped', value: 'TotalDistanceLongJumped' },
-          { label: 'Distance Shot Putted', value: 'TotalDistanceShotPut' },
-          // Add other metrics here
+          { label: 'Total Distance Ran', value: 'TotalDistanceRan' },
+          { label: 'Total Time Ran', value: 'TotalTimeRan' },
+          { label: 'Total Distance Long Jumped', value: 'TotalDistanceLongJumped' },
+          { label: 'Total Distance Shot Put', value: 'TotalDistanceShotPut' },
+          { label: 'Total Distance High Jumped', value: 'TotalDistanceHighJumped' },
+          { label: 'Total Distance Discus Thrown', value: 'TotalDistanceDiscusThrown' },
+          { label: 'Total Distance Javelin Thrown', value: 'TotalDistanceJavelinThrown' },
+          { label: 'Total Distance Hammer Thrown', value: 'TotalDistanceHammerThrown' },
+          { label: 'Total Distance Pole Vaulted', value: 'TotalDistancePoleVaulted' },
+          { label: 'Total Distance Triple Jumped', value: 'TotalDistanceTripleJumped' },
         ]}
+        
       />
       <Text style={styles.chartTitle}>Training Volume Per Week (Last 5 Weeks)</Text>
       <LineChart
