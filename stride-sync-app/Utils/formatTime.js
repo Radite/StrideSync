@@ -1,19 +1,34 @@
 // formatTime.js
 
+/**
+ * Formats a time value in seconds to a string in HH:MM:SS.ss format.
+ * @param {number|string} seconds - The time value in seconds.
+ * @returns {string} - The formatted time string.
+ */
 export const formatTime = (seconds) => {
   if (isNaN(seconds) || seconds < 0) {
     return 'Invalid time';
   }
 
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = (seconds % 60).toFixed(2);
+  const numSeconds = parseFloat(seconds);
+  const hours = Math.floor(numSeconds / 3600);
+  const minutes = Math.floor((numSeconds % 3600) / 60);
+  const secs = (numSeconds % 60).toFixed(2);
+
+  let formattedTime = '';
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.padStart(5, '0')}`;
-  } else if (minutes > 0) {
-    return `${minutes}:${secs.padStart(5, '0')}`;
-  } else {
-    return secs.padStart(5, '0');
+    formattedTime += `${hours}:`;
   }
+
+  if (hours > 0 || minutes > 0) {
+    formattedTime += `${minutes.toString().padStart(2, '0')}:`;
+  }
+
+  // Remove trailing zeros from seconds, but keep at least one digit after decimal point
+  const formattedSecs = secs.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+
+  formattedTime += formattedSecs;
+
+  return formattedTime;
 };

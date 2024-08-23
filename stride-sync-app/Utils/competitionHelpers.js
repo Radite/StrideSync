@@ -43,3 +43,11 @@ export const saveCompetitionData = async (competitionData) => {
     return null;
   }
 };
+
+export const isFieldEvent = (eventName) => {
+  const fieldEvents = [
+    'Long Jump', 'High Jump', 'Pole Vault', 'Shot Put',
+    'Discus', 'Javelin', 'Hammer Throw'
+  ];
+  return fieldEvents.includes(eventName);
+};

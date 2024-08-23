@@ -8,8 +8,29 @@ import { convertTimeToSeconds } from '../../Utils/eventUtils';
 import styles from '../../Styles/LogCompetitionScreenStyles';
 
 // Function to validate individual marks
-const validateMark = (mark) => {
-  // Regular expression to validate time format
+const validateMark = (mark, event) => {
+  const fieldEvents = ['Long Jump', 'High Jump', 'Pole Vault', 'Shot Put', 'Discus', 'Javelin', 'Hammer Throw'];
+  
+  // If the event is a field event, validate it as a decimal number
+  if (fieldEvents.includes(event)) {
+    // Regular expression to validate any number with up to two decimal places
+    const decimalPattern = /^\d+(\.\d{1,2})?$/;
+
+    // Trim the input to remove any leading/trailing spaces
+    const normalizedMark = mark.trim();
+
+    if (!normalizedMark) {
+      return 'Mark is required for field events.';
+    }
+
+    if (!decimalPattern.test(normalizedMark)) {
+      return 'Marks for field events must be a valid number with up to two decimal places.';
+    }
+
+    return null; // No error for field events
+  }
+
+  // Regular expression to validate time format for track events
   const timePattern = /^(\d{1,2}):(\d{2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})\.(\d{1,2})$|^(\d{1,2}):(\d{2})$|^(\d{1,2})\.(\d{1,2})$|^(\d{1,2})$|^(\d{2})$|^(\d{1})$/;
 
   // Normalize the mark to ensure milliseconds are properly handled
@@ -29,7 +50,7 @@ const validateMark = (mark) => {
     match[4] || '00'
   ];
 
-  // Validate ranges
+  // Validate ranges for track event times
   if (hours && (hours < 0 || hours > 23)) {
     return 'Invalid hours value.';
   }
@@ -43,7 +64,7 @@ const validateMark = (mark) => {
     return 'Invalid milliseconds value.';
   }
 
-  return null; // No error
+  return null; // No error for track events
 };
 
 const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
@@ -71,16 +92,16 @@ const CompetitionForm = ({ eventOptions, onSubmit, today }) => {
   const handleEventChange = (index, field, value) => {
     const newEvents = [...events];
     newEvents[index][field] = value;
-
+  
     if (field === 'mark') {
-      // Validate mark when changed
-      const error = validateMark(value);
+      // Pass event type to validateMark
+      const error = validateMark(value, newEvents[index].event);
       newEvents[index].markError = error;
     }
-    
+  
     setEvents(newEvents);
   };
-
+  
   const handleDeleteEvent = (index) => {
     const newEvents = events.filter((_, i) => i !== index);
     setEvents(newEvents);

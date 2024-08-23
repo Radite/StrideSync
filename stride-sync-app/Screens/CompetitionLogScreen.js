@@ -8,7 +8,8 @@ import styles from '../Styles/CompetitionLogScreenStyles';
 import { formatTime } from '../Utils/formatTime';
 import DateFilter from '../Components/Training/DateFilter';
 import { format } from 'date-fns';
-import { getCompetitionByID } from '../Utils/getCompetitionByID';  // <-- Import the function
+import { getCompetitionByID } from '../Utils/getCompetitionByID'; // <-- Import the function
+import { isFieldEvent } from '../Utils/competitionHelpers'; // <-- Import the helper function
 
 const CompetitionLogScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,14 +103,14 @@ const CompetitionLogScreen = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={styles.sessionContainer}
-              onPress={() => getCompetitionByID(comp.CompetitionID, navigation)}  // <-- Use the imported function here
+              onPress={() => getCompetitionByID(comp.CompetitionID, navigation)} // <-- Use the imported function here
             >
               <Text style={styles.sessionDate}>{format(new Date(comp.CompetitionDate), 'MMM dd, yyyy')}</Text>
               {comp.EventResults.map((result, idx) => (
                 <View key={idx} style={styles.resultContainer}>
                   <Text style={styles.event}>{result.Event}</Text>
                   <Text style={styles.position}>Position: {result.Position}</Text>
-                  <Text style={styles.time}>Mark: {formatTime(result.Mark)}</Text>
+                  <Text style={styles.time}>Mark: {isFieldEvent(result.Event) ? result.Mark : formatTime(result.Mark)}</Text>
                 </View>
               ))}
             </TouchableOpacity>
