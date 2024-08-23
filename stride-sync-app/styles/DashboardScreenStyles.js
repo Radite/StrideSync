@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   },
   cardsScrollView: {
     flexDirection: 'row',
-    marginBottom: 50,
+    marginBottom: 20,
   },
   card: {
     width: width * 0.6,
