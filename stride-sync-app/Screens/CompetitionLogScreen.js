@@ -103,7 +103,7 @@ const CompetitionLogScreen = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={styles.sessionContainer}
-              onPress={() => getCompetitionByID(comp.CompetitionID, navigation)} // <-- Use the imported function here
+              onPress={() => getCompetitionByID(comp.CompetitionID, navigation)} 
             >
               <Text style={styles.sessionDate}>{format(new Date(comp.CompetitionDate), 'MMM dd, yyyy')}</Text>
               {comp.EventResults.map((result, idx) => (

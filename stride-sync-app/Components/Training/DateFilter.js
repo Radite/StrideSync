@@ -1,7 +1,6 @@
-// DateFilter.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { format, startOfWeek, endOfWeek, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, startOfWeek, endOfWeek, subDays, subMonths } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import styles from '../../Styles/TrainingLogScreenStyles'; 
 
@@ -14,15 +13,15 @@ const DateFilter = ({ dateFilter, setDateFilter, startDate, setStartDate, endDat
   };
 
   const onDayPress = (day) => {
-    const selectedDate = day.dateString;
+    const selectedDate = new Date(day.dateString);
 
-    if (!startDate || (endDate && selectedDate < startDate)) {
-      setStartDate(selectedDate);
+    if (!startDate || (endDate && selectedDate < new Date(startDate))) {
+      setStartDate(selectedDate.toISOString());
       setEndDate(null);
-    } else if (!endDate && selectedDate > startDate) {
-      setEndDate(selectedDate);
+    } else if (!endDate && selectedDate > new Date(startDate)) {
+      setEndDate(selectedDate.toISOString());
     } else if (startDate && endDate) {
-      setStartDate(selectedDate);
+      setStartDate(selectedDate.toISOString());
       setEndDate(null);
     }
   };
@@ -31,18 +30,26 @@ const DateFilter = ({ dateFilter, setDateFilter, startDate, setStartDate, endDat
     const markedDates = {};
 
     if (startDate) {
-      markedDates[startDate] = { startingDay: true, color: '#50cebb', textColor: 'white' };
+      markedDates[new Date(startDate).toLocaleDateString('en-CA')] = {
+        startingDay: true,
+        color: '#50cebb',
+        textColor: 'white'
+      };
     }
 
     if (endDate) {
-      markedDates[endDate] = { endingDay: true, color: '#50cebb', textColor: 'white' };
+      markedDates[new Date(endDate).toLocaleDateString('en-CA')] = {
+        endingDay: true,
+        color: '#50cebb',
+        textColor: 'white'
+      };
     }
 
     if (startDate && endDate) {
       let start = new Date(startDate);
       let end = new Date(endDate);
       while (start <= end) {
-        const dateString = format(start, 'yyyy-MM-dd');
+        const dateString = start.toLocaleDateString('en-CA');
         markedDates[dateString] = { color: '#70d7c7', textColor: 'white' };
         start.setDate(start.getDate() + 1);
       }
@@ -52,33 +59,33 @@ const DateFilter = ({ dateFilter, setDateFilter, startDate, setStartDate, endDat
   };
 
   const setToday = () => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    setStartDate(today);
-    setEndDate(today);
+    const today = new Date();
+    setStartDate(today.toISOString());
+    setEndDate(today.toISOString());
     setDateFilter('custom_range');
   };
 
   const setYesterday = () => {
-    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-    setStartDate(yesterday);
-    setEndDate(yesterday);
+    const yesterday = subDays(new Date(), 1);
+    setStartDate(yesterday.toISOString());
+    setEndDate(yesterday.toISOString());
     setDateFilter('custom_range');
   };
 
   const setLastWeek = () => {
-    const lastWeekStart = format(startOfWeek(subDays(new Date(), 7)), 'yyyy-MM-dd');
-    const lastWeekEnd = format(endOfWeek(subDays(new Date(), 7)), 'yyyy-MM-dd');
-    setStartDate(lastWeekStart);
-    setEndDate(lastWeekEnd);
+    const lastWeekStart = startOfWeek(subDays(new Date(), 7));
+    const lastWeekEnd = endOfWeek(subDays(new Date(), 7));
+    setStartDate(lastWeekStart.toISOString());
+    setEndDate(lastWeekEnd.toISOString());
     setDateFilter('custom_range');
   };
 
   const setAllTime = () => {
-    const allTimeStartDate = '2000-01-01'; // or use a dynamic start date based on your data
-    const allTimeEndDate = format(new Date(), 'yyyy-MM-dd');
+    const allTimeStartDate = '2000-01-01';
+    const allTimeEndDate = new Date();
   
-    setStartDate(allTimeStartDate);
-    setEndDate(allTimeEndDate);
+    setStartDate(new Date(allTimeStartDate).toISOString());
+    setEndDate(allTimeEndDate.toISOString());
     setDateFilter('custom_range');
   };
 
@@ -107,7 +114,7 @@ const DateFilter = ({ dateFilter, setDateFilter, startDate, setStartDate, endDat
       >
         <Text style={styles.filterText}>
           {dateFilter === 'custom_range'
-            ? `${format(new Date(startDate), 'MMM dd, yyyy')} - ${format(new Date(endDate), 'MMM dd, yyyy')}`
+            ? `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`
             : 'Select Range'}
         </Text>
         <Text style={styles.arrow}>▼</Text>

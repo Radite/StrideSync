@@ -32,7 +32,7 @@ const useDashboardData = () => {
   });
   const [intensityData, setIntensityData] = useState({ labels: [], datasets: [] });
   const [dailyQuote, setDailyQuote] = useState(getDailyQuote());
-
+  
   const fetchData = async () => {
     try {
       setLoading(true);

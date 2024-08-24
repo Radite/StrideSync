@@ -99,6 +99,11 @@ const styles = StyleSheet.create({
     fontSize: RFValue(16),
     color: '#E0E0E0',
   },
+  divider: {
+    height: 2, 
+    backgroundColor: '#333333', 
+    marginVertical: 10, 
+  },
 });
 
 export default styles;

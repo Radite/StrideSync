@@ -1,5 +1,3 @@
-// formatTime.js
-
 /**
  * Formats a time value in seconds to a string in HH:MM:SS.ss format.
  * @param {number|string} seconds - The time value in seconds.
@@ -22,7 +20,7 @@ export const formatTime = (seconds) => {
   }
 
   if (hours > 0 || minutes > 0) {
-    formattedTime += `${minutes.toString().padStart(2, '0')}:`;
+    formattedTime += `${minutes}:`;
   }
 
   // Remove trailing zeros from seconds, but keep at least one digit after decimal point

@@ -46,6 +46,9 @@ const DashboardScreen = ({ navigation }) => {
           <FieldEventCards fieldEventStats={fieldEventStats} />
         </ScrollView>
 
+        {/* Divider Line */}
+        <View style={styles.divider} />
+
         <PerformanceTrends intensityData={intensityData}/>
         <DailyQuote />
 
